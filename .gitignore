@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+!.env.example
+/pixu-before-redesign.zip
+/asset-audit.jpg
+/dev-server*.log
+/test-results/
+/.npm-cache/
+/pixu-redesign-saved.zip

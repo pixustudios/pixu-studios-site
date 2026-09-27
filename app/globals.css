@@ -1,26 +1,454 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: #f5efe8;
+  --warm-ivory: #f8f3ee;
+  --paper: #f3e9df;
+  --brand-red: #5f1018;
+  --brand-action: #d08a7d;
+  --brand-red-deep: #2b0b11;
+  --brand-red-soft: rgba(95, 16, 24, 0.12);
+  --accent-red: #7c1c26;
+  --charcoal: #171312;
+  --charcoal-soft: #201b1a;
+  --background: #120f10;
+  --background-alt: #181415;
+  --surface: #1b1717;
+  --panel: #f3e9df;
+  --foreground: #f7f1eb;
+  --foreground-soft: rgba(247, 241, 235, 0.72);
+  --heading: #f9f4ef;
+  --heading-soft: rgba(249, 244, 239, 0.7);
+  --line: rgba(255, 255, 255, 0.12);
+  --logo-filter: brightness(0) invert(1);
+  --shadow-soft: 0 20px 45px rgba(17, 14, 13, 0.16);
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --font-body: var(--font-manrope), "Segoe UI", sans-serif;
+  --font-display-family: var(--font-cormorant), Georgia, serif;
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display-family);
+}
+
+html[data-theme="light"] {
+  --background: #f8f3ee;
+  --background-alt: #f1e5db;
+  --surface: #fffaf6;
+  --panel: #f3e5d7;
+  --foreground: #1b1715;
+  --foreground-soft: rgba(27, 23, 21, 0.72);
+  --heading: #1b1715;
+  --heading-soft: rgba(27, 23, 21, 0.72);
+  --line: rgba(27, 23, 21, 0.12);
+  --brand-red: #5d0f17;
+  --brand-action: #5d0f17;
+  --brand-red-deep: #340911;
+  --brand-red-soft: rgba(93, 15, 23, 0.1);
+  --logo-filter: none;
+  --shadow-soft: 0 18px 40px rgba(36, 26, 22, 0.09);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display-family);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.pixu-original * {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--background);
+  color: var(--foreground);
 }
 
 body {
-  background: var(--background);
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(95, 16, 24, 0.12), transparent 34%),
+    linear-gradient(180deg, var(--background) 0%, var(--background-alt) 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  transition: background 0.25s ease, color 0.25s ease;
+  text-rendering: optimizeLegibility;
 }
+
+.pixu-original .brand-motion {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pixu-original .shooting-star {
+  position: absolute;
+  top: 20%;
+  left: -12rem;
+  width: 0.62rem;
+  height: 0.62rem;
+  background: var(--brand-action);
+  clip-path: polygon(50% 0%, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0% 50%, 38% 38%);
+  opacity: 0;
+  animation: pixu-shooting-star 17s ease-in-out 4s infinite;
+}
+
+.pixu-original .shooting-star::after {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  width: 5.5rem;
+  height: 1px;
+  background: var(--brand-action);
+  content: "";
+  opacity: 0.34;
+  transform: translateY(-50%) rotate(-18deg);
+  transform-origin: right center;
+}
+
+.pixu-original .motion-reveal {
+  animation: pixu-reveal 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pixu-original .section-sparkle {
+  position: relative;
+}
+
+.pixu-original .section-sparkle::after {
+  position: absolute;
+  top: 3.5rem;
+  right: 8%;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1px solid var(--brand-action);
+  clip-path: polygon(50% 0%, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0% 50%, 38% 38%);
+  content: "";
+  opacity: 0.55;
+  animation: pixu-sparkle 7s ease-in-out 1s infinite;
+}
+
+@keyframes pixu-shooting-star {
+  0%, 72%, 100% {
+    opacity: 0;
+    transform: translate3d(-8vw, -2vh, 0) rotate(-4deg);
+  }
+  76% {
+    opacity: 0.7;
+  }
+  88% {
+    opacity: 0.42;
+    transform: translate3d(78vw, 25vh, 0) rotate(-4deg);
+  }
+  94% {
+    opacity: 0;
+    transform: translate3d(108vw, 34vh, 0) rotate(-4deg);
+  }
+}
+
+@keyframes pixu-sparkle {
+  0%, 100% {
+    opacity: 0.28;
+    transform: rotate(0deg) scale(0.95);
+  }
+  50% {
+    opacity: 0.62;
+    transform: rotate(12deg) scale(1.05);
+  }
+}
+
+@keyframes pixu-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pixu-original img {
+  display: block;
+  max-width: 100%;
+}
+
+.pixu-original button,
+.pixu-original input,
+.pixu-original select,
+.pixu-original textarea {
+  font: inherit;
+}
+
+.pixu-original a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pixu-original main > header {
+  display: none !important;
+}
+
+.pixu-original .header-book-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--brand-red);
+  color: var(--warm-ivory);
+  padding: 0.625rem 1.25rem;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  transition: color 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.pixu-original .header-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--foreground-soft);
+  padding: 0.5rem 0.75rem;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  transition: border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.pixu-original .header-book-link:hover,
+.pixu-original .header-theme-toggle:hover {
+  opacity: 0.8;
+}
+
+.pixu-original h1,
+.pixu-original h2,
+.pixu-original h3,
+.pixu-original h4 {
+  font-family: var(--font-display-family);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 0.96;
+}
+
+.pixu-original p,
+.pixu-original span,
+.pixu-original label,
+.pixu-original li,
+.pixu-original a,
+.pixu-original button,
+.pixu-original input,
+.pixu-original select,
+.pixu-original textarea {
+  letter-spacing: 0;
+}
+
+.pixu-original ::selection {
+  background: rgba(95, 16, 24, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .pixu-original *,
+  .pixu-original *::before,
+  .pixu-original *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .pixu-original .shooting-star,
+  .pixu-original .section-sparkle::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .pixu-original .motion-reveal {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .pixu-original .shooting-star {
+    top: 30%;
+    animation-duration: 20s;
+  }
+
+  .pixu-original .shooting-star::after {
+    width: 3.5rem;
+  }
+
+  .pixu-original .section-sparkle::after {
+    top: 2.5rem;
+    right: 12%;
+  }
+}
+
+@media (min-width: 1440px) {
+  .pixu-original header > div.mx-auto {
+    max-width: 1600px;
+  }
+
+  .pixu-original header > div > div {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    column-gap: 0 !important;
+    min-height: 160px;
+  }
+
+  .pixu-original header > div > div > nav:first-child {
+    display: flex;
+    align-items: center;
+    justify-self: end;
+    margin-right: 48px;
+    gap: 0.5rem !important;
+    white-space: nowrap;
+  }
+
+  .pixu-original header > div > div > nav:first-child a {
+    white-space: nowrap;
+    font-size: 14px !important;
+    line-height: 1.2;
+  }
+
+  .pixu-original header > div > div > nav:first-child a[href="#booking"],
+  .pixu-original header > div > div > nav:first-child a[href="/#booking"] {
+    background: transparent !important;
+    border-bottom: 1px solid var(--brand-action);
+    border-radius: 0;
+    color: var(--brand-action) !important;
+    font-size: 12px !important;
+    font-weight: 700;
+    padding: 0.45rem 0.2rem 0.35rem;
+  }
+
+  .pixu-original header > div > div > a.justify-self-center {
+    position: static;
+    transform: none;
+  }
+
+  .pixu-original header > div > div > div:last-child {
+    grid-column: 3;
+    justify-self: end;
+    margin-left: 0;
+    margin-right: 80px;
+  }
+
+  .pixu-original header > div > div > div:last-child button {
+    background: transparent !important;
+    border-color: var(--line) !important;
+    color: var(--foreground-soft) !important;
+    font-size: 11px !important;
+    line-height: 1.2;
+    padding: 0.62rem 0.85rem;
+    white-space: nowrap;
+  }
+
+  .pixu-original header > div > div > div:last-child .header-online-link {
+    color: var(--brand-action);
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .pixu-original header > div > div > div:last-child .header-online-link:hover {
+    color: var(--foreground);
+  }
+
+  .pixu-original header > div > div > div:last-child a[href="#booking"],
+  .pixu-original header > div > div > div:last-child a[href="/#booking"] {
+    background: transparent !important;
+    border-bottom: 1px solid var(--brand-action);
+    border-radius: 0;
+    color: var(--brand-action) !important;
+    font-size: 12px !important;
+    font-weight: 700;
+    padding: 0.45rem 0.2rem 0.35rem;
+    white-space: nowrap;
+  }
+
+  .pixu-original header > div > div > nav:first-child a[href="#booking"]:hover,
+  .pixu-original header > div > div > nav:first-child a[href="/#booking"]:hover,
+  .pixu-original header > div > div > div:last-child a[href="#booking"]:hover,
+  .pixu-original header > div > div > div:last-child a[href="/#booking"]:hover {
+    border-bottom-color: var(--foreground);
+    color: var(--foreground) !important;
+  }
+
+  .pixu-original header > div > div > div:last-child button:hover {
+    border-color: var(--foreground-soft) !important;
+    color: var(--foreground) !important;
+  }
+}
+
+@media (min-width: 1440px) and (max-width: 1599px) {
+  .pixu-original header > div > div > nav:first-child {
+    margin-right: 28px;
+    gap: 0.5rem !important;
+  }
+
+  .pixu-original header > div > div > nav:first-child a {
+    font-size: 13px !important;
+  }
+
+  .pixu-original header > div > div > nav:first-child a[href="#booking"],
+  .pixu-original header > div > div > nav:first-child a[href="/#booking"] {
+    font-size: 11px !important;
+    padding-inline: 0.85rem;
+  }
+
+  .pixu-original header > div > div > div:last-child {
+    justify-self: end;
+    margin-left: 0;
+    margin-right: 28px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pixu-original header > div > div {
+    position: relative;
+    min-height: 160px;
+  }
+
+  .pixu-original header > div > div > nav:first-child {
+    display: none !important;
+  }
+
+  .pixu-original header > div > div > a.justify-self-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+  }
+
+  .pixu-original header > div > div > div:last-child {
+    grid-column: 3;
+    justify-self: end;
+    z-index: 2;
+  }
+
+  .pixu-original header > div > nav:last-child {
+    display: flex !important;
+    gap: 0.75rem;
+  }
+
+  .pixu-original header > div > nav:last-child a {
+    white-space: nowrap;
+  }
+}
+
+.skip-link { position: fixed; top: -100px; left: 16px; z-index: 1000; padding: 12px; background: #f5efe8; color: #141112; }
+.skip-link:focus { top: 12px; }
+
+html { scroll-padding-top: 110px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
