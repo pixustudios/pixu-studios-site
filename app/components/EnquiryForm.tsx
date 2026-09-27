@@ -133,7 +133,7 @@ function EnquiryFormContent() {
           details together.
         </p>
         <Link href="/#gallery" className="text-link">
-          A little inspiration while you wait ↗
+          A little inspiration while you wait
         </Link>
       </div>
     );
@@ -256,7 +256,6 @@ function EnquiryFormContent() {
       )}
       <button className="button" type="submit" disabled={state === "loading"}>
         {state === "loading" ? "Sending your enquiry…" : "Send enquiry"}
-        <span aria-hidden="true">↗</span>
       </button>
       <p className="form-note">
         We’ll use these details to respond to your enquiry.{" "}

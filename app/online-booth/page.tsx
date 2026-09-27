@@ -238,7 +238,7 @@ export default function OnlineBooth() {
                 track("online_booth_started");
               }}
             >
-              Start the booth <span aria-hidden="true">↗</span>
+              Start the booth
             </button>
           </>
         )}
@@ -267,7 +267,7 @@ export default function OnlineBooth() {
               ))}
             </div>
             <button className="button" onClick={() => setStep("permission")}>
-              Continue →
+              Continue
             </button>
           </>
         )}
@@ -375,7 +375,7 @@ export default function OnlineBooth() {
                   onClick={download}
                   disabled={!exportFile}
                 >
-                  {exportFile ? "Download image ↓" : "Preparing image…"}
+                  {exportFile ? "Download image" : "Preparing image…"}
                 </button>
                 {shareable && (
                   <button
@@ -383,7 +383,7 @@ export default function OnlineBooth() {
                     onClick={share}
                     disabled={!exportFile}
                   >
-                    Share ↗
+                    Share
                   </button>
                 )}
                 <button className="text-link" onClick={resetCamera}>

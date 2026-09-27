@@ -25,7 +25,7 @@ export default function Home() {
           <Image src={service.id === "photobooth" ? "/booth.jpeg" : service.image.src} alt={service.id === "photobooth" ? "PIXÜ vintage photobooth set up for an event" : service.image.alt} width={service.image.width} height={service.image.height} sizes="(max-width: 767px) 90vw, 45vw" className="h-[360px] w-full rounded-[1.4rem] object-cover" />
           <h3 className="mt-6 text-3xl text-[color:var(--heading)] sm:text-4xl">{service.name}</h3>
           <p className="mt-4 text-base leading-8 text-[color:var(--foreground-soft)]">{service.description}</p>
-          <Link className="mt-5 inline-flex text-sm underline underline-offset-4" href={`/experiences#${service.id}`}>{service.link} ↗</Link>
+          <Link className="mt-5 inline-flex text-sm underline underline-offset-4" href={`/experiences#${service.id}`}>{service.link}</Link>
         </article>)}
       </div>
     </SectionShell>

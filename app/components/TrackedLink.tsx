@@ -15,7 +15,6 @@ export default function TrackedLink({
   return (
     <Link href={href} className={className} onClick={() => track(event)}>
       {children}
-      <span aria-hidden="true"> ↗</span>
     </Link>
   );
 }

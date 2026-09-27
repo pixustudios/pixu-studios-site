@@ -25,10 +25,10 @@ export default function Experiences() {
         </p>
         <div className="actions">
           <a className="text-link" href="#photobooth">
-            Vintage Photobooth ↓
+            Vintage Photobooth
           </a>
           <a className="text-link" href="#film">
-            35mm Film ↓
+            35mm Film
           </a>
         </div>
       </header>

@@ -11,8 +11,8 @@ export default function SiteFooter() {
       </div>
       <div className="footer-links">
         <p className="footer-label">Follow</p>
-        <a href={site.instagram} target="_blank" rel="noreferrer">Instagram ↗</a>
-        <a href={site.tiktok} target="_blank" rel="noreferrer">TikTok ↗</a>
+        <a href={site.instagram} target="_blank" rel="noreferrer">Instagram</a>
+        <a href={site.tiktok} target="_blank" rel="noreferrer">TikTok</a>
         <Link href="/privacy">Privacy & cookies</Link>
       </div>
       <p className="copyright">

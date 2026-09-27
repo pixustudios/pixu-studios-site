@@ -17,7 +17,7 @@ export default async function Reviews() {
         </p>
         {content.url && (
           <a className="text-link" href={content.url}>
-            Read all reviews on Google ↗
+            Read all reviews on Google
           </a>
         )}
       </section>
@@ -68,7 +68,7 @@ export default async function Reviews() {
                 {review.source && review.url && (
                   <>
                     {" "}
-                    · <a href={review.url}>Original review ↗</a>
+                    · <a href={review.url}>Original review</a>
                     <span className="google-attribution" translate="no">
                       Google Maps
                     </span>
@@ -81,7 +81,7 @@ export default async function Reviews() {
       </div>
       {content.url && (
         <a href={content.url} className="text-link">
-          Read all reviews on Google ↗
+          Read all reviews on Google
         </a>
       )}
     </section>

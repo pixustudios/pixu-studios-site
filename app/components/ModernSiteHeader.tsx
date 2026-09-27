@@ -86,7 +86,6 @@ export default function SiteHeader() {
             aria-current={pathname === link.href ? "page" : undefined}
           >
             {link.label}
-            <span aria-hidden="true">↗</span>
           </Link>
         ))}
         <div onClick={() => setOpen(false)}>

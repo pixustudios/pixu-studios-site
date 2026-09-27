@@ -11,7 +11,7 @@ export default function NotFound() {
       <p>Let’s get you back to the good times.</p>
       <div className="actions">
         <Link href="/" className="button">
-          Back to PIXÜ ↗
+          Back to PIXÜ
         </Link>
       </div>
     </main>
