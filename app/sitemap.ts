@@ -5,7 +5,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/",
     "/experiences",
     "/about",
-    "/contact",
     "/online-booth",
     "/privacy",
   ].map((path) => ({ url: new URL(path, site.url).toString() }));

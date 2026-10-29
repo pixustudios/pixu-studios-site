@@ -1,6 +1,8 @@
 export const site = {
   name: "PIXÜ Studios",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  url: process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` :
+      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
   email: "info@pixustudios.com",
   instagram: "https://www.instagram.com/pixustudios",
   tiktok: "https://www.tiktok.com/@pixustudios",
