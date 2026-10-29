@@ -29,7 +29,7 @@ const cormorant = localFont({
 });
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
-  title: { default: "PIXÜ Studios", template: "%s | PIXÜ Studios" },
+  title: { default: "pixü - vintage photobooth hire", template: "%s | PIXÜ Studios" },
   robots:
     process.env.NEXT_PUBLIC_SITE_URL && process.env.VERCEL_ENV !== "preview"
       ? { index: true, follow: true }
