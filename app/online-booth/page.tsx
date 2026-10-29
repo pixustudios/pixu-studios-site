@@ -1,8 +1,11 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   boothTemplates,
+  boothLayouts,
+  type BoothLayoutId,
   cameraErrorMessage,
   createComposite,
   requestCamera,
@@ -12,7 +15,19 @@ import TrackedLink from "../components/TrackedLink";
 type Step = "landing" | "layout" | "permission" | "camera" | "preview";
 export default function OnlineBooth() {
   const [step, setStep] = useState<Step>("landing");
-  const [count, setCount] = useState(4);
+  const [entering, setEntering] = useState(false);
+  useEffect(() => {
+    if (!entering) return;
+    const reveal = window.setTimeout(() => setStep("layout"), 300);
+    const finish = window.setTimeout(() => setEntering(false), 1000);
+    return () => {
+      window.clearTimeout(reveal);
+      window.clearTimeout(finish);
+    };
+  }, [entering]);
+  const [layoutId, setLayoutId] = useState<BoothLayoutId>("strip");
+  const selectedLayout = boothLayouts.find((item) => item.id === layoutId)!;
+  const count = selectedLayout.count;
   const [photos, setPhotos] = useState<string[]>([]);
   const [template, setTemplate] = useState(0);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -62,7 +77,7 @@ export default function OnlineBooth() {
   useEffect(() => {
     if (step !== "preview" || !photos.length) return;
     let cancelled = false;
-    createComposite(photos, boothTemplates[template])
+    createComposite(photos, boothTemplates[template], layoutId)
       .then(({ canvas, blob }) => {
         if (cancelled || !preview.current) return;
         preview.current.width = canvas.width;
@@ -80,7 +95,7 @@ export default function OnlineBooth() {
     return () => {
       cancelled = true;
     };
-  }, [photos, template, step]);
+  }, [photos, template, step, layoutId]);
   const resetCamera = () => {
     stop();
     setPhotos([]);
@@ -206,63 +221,71 @@ export default function OnlineBooth() {
   return (
     <main id="main" className="container booth-shell">
       <header className="booth-heading">
-        <p className="eyebrow">A little PIXÜ, wherever you are</p>
         <h1>
-          PIXÜ <em>Online Booth</em>
+          <em>Online Booth</em>
         </h1>
         <p>Get close. Be yourself. Keep the moment.</p>
       </header>
       <section
         ref={panel}
         tabIndex={-1}
-        className={`booth-panel${step === "landing" ? " booth-heart" : ""}`}
+        className={`booth-panel${step === "landing" ? " booth-brand" : " booth-sketch-stage"}${entering ? " is-entering" : ""}`}
         aria-label="Online photobooth"
+        data-step={step}
+        aria-busy={entering}
       >
+        {step !== "landing" && <button type="button" className="booth-close" aria-label="Close booth and return to welcome" title="Back to welcome" onClick={() => { resetCamera(); setEntering(false); setStep("landing"); requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(".booth-entry-ticket")?.focus()); }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>}
+        {entering && <div className="booth-curtain-transition" aria-hidden="true"><span /><span /></div>}
+        {step !== "landing" && <div className="booth-stage-masthead"><Image className="booth-ink-transparent" src="/online-booth-sketch-facing-right.svg" alt="" width={480} height={620} /><div><span>Inside the booth</span><p>{step === "layout" ? "01 — Pick your format" : step === "permission" ? "02 — Pull up a seat" : step === "camera" ? "03 — Make a memory" : "04 — Yours to keep"}</p></div></div>}
         {step === "landing" && (
           <>
-            <svg className="booth-heart-shape" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M50 96 C40 85 3 63 3 31 C3 7 31 0 50 20 C69 0 97 7 97 31 C97 63 60 85 50 96 Z" /></svg>
-            <p className="eyebrow">Your digital keepsake</p>
+            <Image className="booth-illustration booth-ink-transparent" src="/online-booth-sketch-facing-right.svg" alt="Simple line sketch of a vintage photobooth facing right with a handwritten PIXÜ sign" width={480} height={620} priority />
+            <div className="booth-intro-copy">
             <h2>
               Pull up a friend.
               <br />
               <em>Or steal a moment.</em>
             </h2>
             <p>
-              A four-photo strip or a single frame. Choose a PIXÜ finish, then
+              A photo strip, a four-frame grid or a single moment. Choose a PIXÜ finish, then
               download your own little memory.
             </p>
             <button
-              className="button"
+              className="booth-entry-ticket"
+              disabled={entering}
               onClick={() => {
-                setStep("layout");
+                if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setStep("layout");
+                else setEntering(true);
                 track("online_booth_started");
               }}
             >
-              Start the booth
+              <span className="booth-ticket-stub" aria-hidden="true">01</span>
+              <span className="booth-ticket-copy"><span className="booth-ticket-caption">Your moment awaits</span><span className="booth-ticket-title">Enter the booth</span></span>
+              <svg className="booth-ticket-door" viewBox="0 0 32 40" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true"><path d="m5 36 1-31 22 1-1 30M3 37h27" /><path className="ticket-door-leaf" d="m7 6 15 4-1 25-15 1 1-30Z" /><path d="m17 21 1 .2" strokeWidth="2.5" /></svg>
             </button>
+            </div>
           </>
         )}
         {step === "layout" && (
           <>
-            <p className="eyebrow">01 / Make it yours</p>
             <h2>Choose your layout.</h2>
             <div className="booth-layouts">
-              {[4, 1].map((n) => (
+              {boothLayouts.map((layout) => (
                 <button
-                  key={n}
+                  key={layout.id}
                   className="layout-option"
-                  aria-pressed={count === n}
-                  onClick={() => setCount(n)}
+                  aria-pressed={layoutId === layout.id}
+                  onClick={() => setLayoutId(layout.id)}
                 >
                   <span
-                    className={`layout-diagram ${n === 1 ? "single" : ""}`}
+                    className={`layout-diagram format-${layout.id}`}
                     aria-hidden="true"
                   >
-                    {Array.from({ length: n }, (_, i) => (
+                    {Array.from({ length: layout.count }, (_, i) => (
                       <i key={i} />
                     ))}
                   </span>
-                  {n === 4 ? "4-photo strip" : "Single photo"}
+                  {layout.name}
                 </button>
               ))}
             </div>
@@ -273,7 +296,6 @@ export default function OnlineBooth() {
         )}
         {step === "permission" && (
           <>
-            <p className="eyebrow">02 / Just you and the camera</p>
             <h2>Let’s see you.</h2>
             <p>
               Allow camera access to take your photographs. No microphone, no
@@ -299,11 +321,11 @@ export default function OnlineBooth() {
           </>
         )}
         <div hidden={step !== "camera"}>
-          <p className="eyebrow" aria-live="polite">
-            03 / Photo {frame} of {count}
+          <p className="small" aria-live="polite">
+            Photo {frame} of {count}
           </p>
           <h2>{busy ? "Make it a moment." : "Ready when you are."}</h2>
-          <div className="booth-camera">
+          <div className="booth-camera" style={{ aspectRatio: selectedLayout.frameRatio }}>
             <video
               ref={video}
               autoPlay
@@ -319,15 +341,15 @@ export default function OnlineBooth() {
             {flash && <span className="camera-flash" aria-hidden="true" />}
           </div>
           <p className="small">
-            {count === 4
-              ? "Four photographs, automatically. Three seconds to find each pose."
+            {count > 1
+              ? `${count} photographs, automatically. Three seconds to find each pose.`
               : "One photograph. Three seconds to find your pose."}
           </p>
           <div className="actions">
             <button className="button" disabled={busy} onClick={capture}>
               {busy
                 ? "Capturing…"
-                : count === 4
+                : count > 1
                   ? "Start the countdown"
                   : "Take my photo"}
             </button>
@@ -343,15 +365,14 @@ export default function OnlineBooth() {
               width={1200}
               height={photos.length * 850 + 220}
               role="img"
-              aria-label={`Your completed PIXÜ ${count === 4 ? "four-photo strip" : "photograph"}`}
+              aria-label={`Your completed PIXÜ ${selectedLayout.name}`}
             />
             <div>
-              <p className="eyebrow">04 / Yours to keep</p>
               <h2>
                 That’s <em>a keeper.</em>
               </h2>
               <p>
-                Choose a finish for your {count === 4 ? "strip" : "photograph"}.
+                Choose a finish for your {selectedLayout.name.toLowerCase()}.
               </p>
               <div className="template-options">
                 {boothTemplates.map((item, i) => (
@@ -387,14 +408,14 @@ export default function OnlineBooth() {
                   </button>
                 )}
                 <button className="text-link" onClick={resetCamera}>
-                  Retake {count === 4 ? "the strip" : "photo"}
+                  Retake {count > 1 ? "photos" : "photo"}
                 </button>
               </div>
               <p className="small" style={{ marginTop: 24 }}>
                 Want this at your event?
               </p>
               <TrackedLink
-                href="/contact?experience=photobooth"
+                href="/experiences#booking"
                 className="text-link"
                 event="online_booth_booking_clicked"
               >

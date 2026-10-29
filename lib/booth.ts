@@ -44,13 +44,28 @@ export const boothTemplates = [
   { name: "Paper", background: "#f5efe8", text: "#281d21" },
   { name: "Midnight", background: "#141112", text: "#f5efe8" },
 ];
+export const boothLayouts = [
+  { id: "strip", name: "4-photo strip", count: 4, columns: 1, width: 1200, frameRatio: 16 / 9 },
+  { id: "grid", name: "4-photo grid", count: 4, columns: 2, width: 1600, frameRatio: 16 / 9 },
+  { id: "single", name: "Landscape photo", count: 1, columns: 1, width: 1600, frameRatio: 16 / 9 },
+  { id: "duo", name: "2-photo strip", count: 2, columns: 1, width: 1200, frameRatio: 4 / 3 },
+] as const;
+export type BoothLayoutId = (typeof boothLayouts)[number]["id"];
 export async function createComposite(
   photos: string[],
   template: (typeof boothTemplates)[number],
+  layoutId: BoothLayoutId = photos.length === 1 ? "single" : "strip",
 ) {
+  const layout = boothLayouts.find((item) => item.id === layoutId)!;
+  if (photos.length !== layout.count) throw new Error("Please retake the photos for your selected layout.");
+  const padding = 50;
+  const gap = 28;
+  const frameWidth = (layout.width - padding * 2 - gap * (layout.columns - 1)) / layout.columns;
+  const frameHeight = Math.round(frameWidth / layout.frameRatio);
+  const rows = Math.ceil(layout.count / layout.columns);
   const canvas = document.createElement("canvas");
-  canvas.width = 1200;
-  canvas.height = photos.length * 850 + 220;
+  canvas.width = layout.width;
+  canvas.height = padding * 2 + rows * frameHeight + (rows - 1) * gap + 180;
   const context = canvas.getContext("2d");
   if (!context)
     throw new Error(
@@ -62,15 +77,19 @@ export async function createComposite(
     const photo = new Image();
     photo.src = photos[i];
     await photo.decode();
-    const ratio = Math.min(1080 / photo.width, 810 / photo.height);
-    const width = photo.width * ratio;
-    const height = photo.height * ratio;
+    const ratio = Math.max(frameWidth / photo.width, frameHeight / photo.height);
+    const sourceWidth = Math.min(photo.width, frameWidth / ratio);
+    const sourceHeight = Math.min(photo.height, frameHeight / ratio);
     context.drawImage(
       photo,
-      60 + (1080 - width) / 2,
-      50 + i * 850 + (810 - height) / 2,
-      width,
-      height,
+      (photo.width - sourceWidth) / 2,
+      (photo.height - sourceHeight) / 2,
+      sourceWidth,
+      sourceHeight,
+      padding + (i % layout.columns) * (frameWidth + gap),
+      padding + Math.floor(i / layout.columns) * (frameHeight + gap),
+      frameWidth,
+      frameHeight,
     );
   }
   await document.fonts.ready;
@@ -80,11 +99,11 @@ export async function createComposite(
   context.fillStyle = template.text;
   context.textAlign = "center";
   context.font = `italic 600 85px ${family || "Georgia"}`;
-  context.fillText("pixü", 600, canvas.height - 100);
+  context.fillText("pixü", canvas.width / 2, canvas.height - 100);
   context.font = "24px Arial";
   context.fillText(
     "WHERE MOMENTS ARE HAPPILY DOCUMENTED.",
-    600,
+    canvas.width / 2,
     canvas.height - 45,
   );
   const blob = await new Promise<Blob>((resolve, reject) =>

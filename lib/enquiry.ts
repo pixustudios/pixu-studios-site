@@ -2,10 +2,13 @@
 export const eventTypes = ["Birthday", "Wedding", "Corporate", "Brand Activation", "Private Event/Party", "Other"];
 export const guestCounts = ["Less than 50", "51-100", "101-200", "More than 200"];
 export const boothOptions = ["Digital Only", "Unlimited Prints + Digital"];
+export const referralSources = ["Referral", "Event Attendee", "Facebook", "Instagram", "Tiktok", "Google", "Other"];
+export const contactMethods = ["Email", "SMS"];
 export type Enquiry = {
   name: string; email: string; phone: string; date: string; eventTime: string;
   duration: string; eventType: string; eventTypeOther: string; location: string;
   guestCount: string; boothOption: string; details: string;
+  heardFrom: string; heardFromOther: string; contactMethod: string;
 };
 export const enquiryLabels: Record<keyof Enquiry, string> = {
   name: "Full Name", email: "Email", phone: "Phone", date: "Event Date",
@@ -13,6 +16,7 @@ export const enquiryLabels: Record<keyof Enquiry, string> = {
   eventTypeOther: "Other event type", location: "Location", guestCount: "Estimated Number of Guests",
   boothOption: "Photobooth option",
   details: "Anything else we should know?",
+  heardFrom: "How did you hear about us?", heardFromOther: "Other referral source", contactMethod: "Preferred Method of Contact",
 };
 export function validateEnquiry(raw: Record<string, unknown>, today = new Date().toISOString().slice(0, 10)) {
   const data = Object.fromEntries(Object.keys(enquiryLabels).map(key => [key, typeof raw[key] === "string" ? raw[key].trim() : ""])) as Enquiry;
@@ -23,9 +27,9 @@ export function validateEnquiry(raw: Record<string, unknown>, today = new Date()
   const date = new Date(data.date + "T12:00:00Z");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date) || Number.isNaN(date.getTime()) || date.toISOString().slice(0,10) !== data.date || data.date < today) errors.date = "Choose today or a future event date.";
   for (const key of ["eventTime", "duration"] as const) if (!data[key] || data[key].length > 100) errors[key] = `Please enter ${enquiryLabels[key].toLowerCase()} (up to 100 characters).`;
-  const choices = { eventType: eventTypes, guestCount: guestCounts, boothOption: boothOptions };
+  const choices = { eventType: eventTypes, guestCount: guestCounts, boothOption: boothOptions, heardFrom: referralSources, contactMethod: contactMethods };
   for (const [key, values] of Object.entries(choices)) if (!values.includes(data[key as keyof Enquiry])) errors[key as keyof Enquiry] = "Please choose an option.";
-  for (const [choice, other] of [["eventType", "eventTypeOther"]] as const) {
+  for (const [choice, other] of [["eventType", "eventTypeOther"], ["heardFrom", "heardFromOther"]] as const) {
     if (data[choice] !== "Other") data[other] = "";
     else if (!data[other] || data[other].length > 200) errors[other] = "Please specify (up to 200 characters).";
   }

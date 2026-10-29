@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { track, type AnalyticsEvent } from "@/lib/analytics";
 export default function TrackedLink({
-  href = "/contact",
+  href = "/#booking",
   children = "Book your event",
   className = "button",
   event = "check_availability_clicked",

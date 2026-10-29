@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
-import { validateEnquiry, enquiryLabels, type Enquiry } from "@/lib/enquiry";
+import { validateEnquiry } from "@/lib/enquiry";
+import { googleFormAnswers, googleFormUrl } from "@/lib/google-form";
+const accepted = new Map<string, number>();
 export const runtime = "nodejs";
 const reply = (body: object, status: number) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
@@ -59,15 +61,9 @@ export async function POST(request: Request) {
   )
     return reply({ error: "Please refresh the page and try again." }, 400);
   const {
-    RESEND_API_KEY,
-    ENQUIRY_FROM_EMAIL,
-    ENQUIRY_TO_EMAIL,
     TURNSTILE_SECRET_KEY,
   } = process.env;
   if (
-    !RESEND_API_KEY ||
-    !ENQUIRY_FROM_EMAIL ||
-    !ENQUIRY_TO_EMAIL ||
     (process.env.NODE_ENV === "production" && !TURNSTILE_SECRET_KEY)
   )
     return reply(
@@ -109,26 +105,17 @@ export async function POST(request: Request) {
         );
     }
     const { data } = validated;
-    const text = Object.entries(data)
-      .map(([key, value]) => `${enquiryLabels[key as keyof Enquiry]}: ${value || "Not supplied"}`)
-      .join("\n\n");
     const hash = createHash("sha256")
-      .update(JSON.stringify(data))
+      .update(raw.requestId + JSON.stringify(data))
       .digest("hex");
-    const response = await fetch("https://api.resend.com/emails", {
+    for (const [key, expires] of accepted) if (expires < Date.now()) accepted.delete(key);
+    if (accepted.has(hash)) return reply({ ok: true }, 200);
+    const response = await fetch(googleFormUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-        "Idempotency-Key": `pixu-${raw.requestId}-${hash}`,
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: JSON.stringify({
-        from: ENQUIRY_FROM_EMAIL,
-        to: [ENQUIRY_TO_EMAIL],
-        reply_to: data.email,
-        subject: `PIXÜ enquiry · ${data.date} · ${data.boothOption}`,
-        text,
-      }),
+      body: googleFormAnswers(data),
       signal: AbortSignal.timeout(12000),
     });
     if (!response.ok)
@@ -139,14 +126,16 @@ export async function POST(request: Request) {
         },
         502,
       );
-    const sent = await response.json();
-    if (!sent.id) throw new Error("No delivery acceptance");
+    const confirmation = await response.text();
+    if (!/class="[^"]*(?:vHW8K|freebirdFormviewerViewResponseConfirmationMessage)/.test(confirmation)) throw new Error("Google Form did not confirm receipt");
+    if (accepted.size >= 1000) accepted.delete(accepted.keys().next().value!);
+    accepted.set(hash, Date.now() + 10 * 60 * 1000);
     return reply({ ok: true }, 200);
   } catch {
     return reply(
       {
         error:
-          "We couldn’t confirm your enquiry was sent. Please retry; duplicate retries are protected, or email info@pixustudios.com.",
+          "We couldn’t confirm your enquiry was received. Please check before submitting again, or email info@pixustudios.com.",
       },
       502,
     );

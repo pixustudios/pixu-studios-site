@@ -12,7 +12,6 @@ export default function About() {
     <main id="main">
       <section className="container about-layout section">
         <div>
-          <p className="eyebrow">A tale of PIXÜ Studios</p>
           <h1>
             It started
             <br />

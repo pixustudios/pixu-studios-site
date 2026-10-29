@@ -4,6 +4,7 @@ export const site = {
   email: "info@pixustudios.com",
   instagram: "https://www.instagram.com/pixustudios",
   tiktok: "https://www.tiktok.com/@pixustudios",
+  facebook: "https://www.facebook.com/pixustudios",
   googleReviewsUrl: "",
   legalName: "",
   postalAddress: "",
@@ -32,7 +33,7 @@ export const gallery = [
   },
   {
     src: "/insta5.jpg",
-    alt: "Friends laughing together in front of the photobooth curtain",
+    alt: "Friends laughing together at a PIXÜ event",
     width: 1219,
     height: 807,
     caption: "One more, together",
@@ -77,10 +78,9 @@ export const experiences = [
   {
     id: "photobooth",
     number: "01",
-    name: "Vintage Photobooth",
-    suffix: "A little booth. A lot of character.",
+    name: "Vintage Photobooth Hire",
     description:
-      "Step behind the curtain, get close, be yourself. Beautiful photographs and instant keepsakes, made for the people in the room.",
+      "Beautiful photographs and instant keepsakes, made for the people in the room.",
     image: gallery[3],
     supporting: [gallery[4], gallery[5]],
     link: "Explore the photobooth",
@@ -93,25 +93,5 @@ export const experiences = [
     detail:
       "DSLR photography, considered lighting and a vintage-style setup. We’ll shape the backdrop and print design around your event.",
     note: "Optional guestbooks, premium backdrops and bespoke styling can be discussed with your quote.",
-  },
-  {
-    id: "film",
-    number: "02",
-    name: "35mm Film Photography",
-    suffix: "For the moments between the moments.",
-    description:
-      "The dance floor, the quiet corners, the people you love. Candid event photography with the warmth and texture of real film.",
-    image: gallery[2],
-    supporting: [gallery[0], gallery[1]],
-    link: "Explore 35mm photography",
-    includes: [
-      "Candid, documentary-style photographs",
-      "Real 35mm analogue film",
-      "Natural, unposed moments",
-      "Coverage tailored to your event",
-    ],
-    detail:
-      "An intimate record of how it felt to be there. Book film photography on its own or alongside the PIXÜ booth.",
-    note: "We’ll confirm coverage, the number of rolls, delivery format and turnaround in your personal quote.",
   },
 ];

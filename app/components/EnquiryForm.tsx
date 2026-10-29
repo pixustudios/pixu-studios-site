@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   eventTypes,
   guestCounts, boothOptions,
+  referralSources, contactMethods,
   validateEnquiry,
   type Enquiry,
 } from "@/lib/enquiry";
@@ -21,6 +22,7 @@ declare global {
 }
 function EnquiryFormContent() {
   const [eventChoice, setEventChoice] = useState("");
+  const [referralChoice, setReferralChoice] = useState("");
   const [errors, setErrors] = useState<Partial<Record<keyof Enquiry, string>>>(
     {},
   );
@@ -218,6 +220,9 @@ function EnquiryFormContent() {
         {field("location", "Location", "text", true)}
         {choice("guestCount", "Estimated Number of Guests", guestCounts)}
         {choice("boothOption", "Photobooth option", boothOptions, undefined, "full")}
+        {choice("heardFrom", "How did you hear about us?", referralSources, setReferralChoice)}
+        {referralChoice === "Other" && field("heardFromOther", "Other referral source")}
+        {choice("contactMethod", "Preferred method of contact", contactMethods)}
         <label className="form-field full">
           <span id="details-label">Anything else we should know? (optional)</span>
           <textarea aria-labelledby="details-label" name="details" rows={2} maxLength={2000} aria-invalid={!!errors.details} aria-describedby={errors.details ? "details-error" : undefined} />

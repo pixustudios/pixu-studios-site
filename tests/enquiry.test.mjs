@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { validateEnquiry } from "../lib/enquiry.ts";
 import { cameraErrorMessage } from "../lib/booth.ts";
+import { googleFormAnswers } from "../lib/google-form.ts";
 const valid = {
   name: "Test Guest",
   email: "guest@example.com",
@@ -73,4 +74,14 @@ test("booking required fields and Other event responses are validated", () => {
   }
   assert.ok(validateEnquiry({ ...valid, eventType: "Other" }).errors.eventTypeOther);
   assert.equal(validateEnquiry({ ...valid, eventType: "Other", eventTypeOther: "Graduation" }).valid, true);
+});
+test("Google Forms Other answers use the native other-option fields", () => {
+  const checked = validateEnquiry({ ...valid, eventType: "Other", eventTypeOther: "Graduation", heardFrom: "Other", heardFromOther: "A flyer" });
+  assert.equal(checked.valid, true);
+  const body = googleFormAnswers(checked.data);
+  assert.equal(body.get("entry.1333492203"), "__other_option__");
+  assert.equal(body.get("entry.1333492203.other_option_response"), "Graduation");
+  assert.equal(body.get("entry.1012614852"), "__other_option__");
+  assert.equal(body.get("entry.1012614852.other_option_response"), "A flyer");
+  assert.ok(validateEnquiry({ ...valid, heardFrom: "Other" }).errors.heardFromOther);
 });

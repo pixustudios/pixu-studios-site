@@ -9,7 +9,7 @@ const source = readFileSync(
 ).replace(
   "@/lib/enquiry",
   pathToFileURL(process.cwd() + "/lib/enquiry.ts").href,
-);
+).replace("@/lib/google-form", pathToFileURL(process.cwd() + "/lib/google-form.ts").href);
 const js = ts.transpileModule(source, {
   compilerOptions: {
     module: ts.ModuleKind.ESNext,
@@ -73,9 +73,10 @@ test("production fails closed without spam credentials", async () => {
   process.env.NODE_ENV = "production";
   assert.equal((await POST(req())).status, 503);
 });
-test("missing delivery credentials never claims success", async () => {
+test("Google Form validation response never claims success", async () => {
   delete process.env.RESEND_API_KEY;
-  assert.equal((await POST(req())).status, 503);
+  globalThis.fetch = async () => new Response('<form>Please answer this question</form>');
+  assert.equal((await POST(req())).status, 502);
 });
 test("failed email provider never claims success", async () => {
   globalThis.fetch = async () => new Response("{}", { status: 500 });
@@ -87,19 +88,22 @@ test("provider timeout is a recoverable failure", async () => {
   };
   assert.equal((await POST(req())).status, 502);
 });
-test("successful retries send identical idempotency key and safe plain text", async () => {
+test("Google Form receives mapped answers and accepted retries are deduplicated", async () => {
   const keys = [];
   globalThis.fetch = async (url, options) => {
-    assert.equal(url, "https://api.resend.com/emails");
-    keys.push(options.headers["Idempotency-Key"]);
-    const body = JSON.parse(options.body);
-    assert.equal(body.reply_to, valid.email);
-    assert.ok(!body.html);
-    return Response.json({ id: "test-accepted" });
+    assert.ok(url.endsWith("/formResponse"));
+    keys.push(url);
+    assert.equal(options.body.get("entry.1212460850"), valid.email);
+    assert.equal(options.body.get("entry.1800385611_year"), "2027");
+    assert.equal(options.body.get("entry.1800385611_month"), "10");
+    assert.equal(options.body.get("entry.1800385611_day"), "20");
+    assert.equal(options.body.get("entry.1012614852"), "Instagram");
+    assert.equal(options.body.get("entry.476307007"), "Email");
+    return new Response('<div class="vHW8K">Your response has been recorded.</div>');
   };
   assert.equal((await POST(req())).status, 200);
   assert.equal((await POST(req())).status, 200);
-  assert.equal(keys[0], keys[1]);
+  assert.equal(keys.length, 1);
 });
 test("Turnstile hostname and action checked before sending", async () => {
   process.env.TURNSTILE_SECRET_KEY = "test-only";
@@ -124,6 +128,6 @@ test("verified production submission is accepted", async () => {
           hostname: "localhost",
           action: "enquiry",
         })
-      : Response.json({ id: "test-accepted" });
+      : new Response('<div class="vHW8K">Your response has been recorded.</div>');
   assert.equal((await POST(req())).status, 200);
 });

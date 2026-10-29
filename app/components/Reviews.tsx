@@ -2,19 +2,10 @@ import Image from "next/image";
 import { getReviews } from "@/lib/reviews";
 export default async function Reviews() {
   const content = await getReviews();
+  if (!content.reviews.length && !content.url) return null;
   if (!content.reviews.length)
     return (
       <section id="reviews" className="container reviews-empty">
-        <p className="eyebrow">From the room</p>
-        <h2>
-          Good company.
-          <br />
-          <em>Even better memories.</em>
-        </h2>
-        <p>
-          The photographs tell the story. Take a look through our recent
-          moments.
-        </p>
         {content.url && (
           <a className="text-link" href={content.url}>
             Read all reviews on Google
@@ -25,7 +16,6 @@ export default async function Reviews() {
   return (
     <section id="reviews" className="section container">
       <div className="section-heading">
-        <p className="eyebrow">From the people who were there</p>
         <h2>A few kind words.</h2>
       </div>
       {content.google && (

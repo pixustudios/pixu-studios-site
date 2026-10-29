@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body,
+  html body a,
+  html body button,
+  html body select,
+  html body [role="button"],
+  html body .pixu-modern button,
+  html body .pixu-modern a {
+    cursor: url('/star-cursor.svg') 16 16, auto;
+  }
+  html body input:not([type="checkbox"]):not([type="radio"]),
+  html body textarea,
+  html body [contenteditable="true"] {
+    cursor: text;
+  }
+}
+
 :root {
   --cream: #f5efe8;
   --warm-ivory: #f8f3ee;
@@ -53,6 +71,15 @@ html[data-theme="light"] {
   --color-foreground: var(--foreground);
   --font-sans: var(--font-body);
   --font-display: var(--font-display-family);
+}
+
+html[data-theme="light"] .home-page {
+  --background: #ffffff;
+  --background-alt: #f7f7f5;
+  --surface: #ffffff;
+}
+html[data-theme="light"] .pixu-original [class~="bg-[color:var(--brand-red)]"] {
+  color: #fff;
 }
 
 .pixu-original * {
@@ -227,6 +254,26 @@ body {
   opacity: 0.8;
 }
 
+.pixu-original .home-page h1,
+.pixu-original .home-page h2,
+.pixu-original .home-page h3 {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  font-style: italic;
+}
+.pixu-original a.contact-enquire-button {
+  background: #fffaf6;
+  color: #701c2c;
+  font-weight: 600;
+}
+.pixu-original a.contact-enquire-button:hover {
+  background: #f1e5db;
+  color: #5d0f17;
+}
+.pixu-original a.contact-enquire-button:focus-visible {
+  outline: 2px solid #fffaf6;
+  outline-offset: 4px;
+}
 .pixu-original h1,
 .pixu-original h2,
 .pixu-original h3,
@@ -449,6 +496,7 @@ body {
 
 .skip-link { position: fixed; top: -100px; left: 16px; z-index: 1000; padding: 12px; background: #f5efe8; color: #141112; }
 .skip-link:focus { top: 12px; }
+
 
 html { scroll-padding-top: 110px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

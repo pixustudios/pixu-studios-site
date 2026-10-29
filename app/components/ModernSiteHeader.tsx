@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import TrackedLink from "./TrackedLink";
 import ThemeToggle from "./ThemeToggle";
 const links = [
   { href: "/#experiences", label: "Experiences" },
@@ -59,7 +58,6 @@ export default function SiteHeader() {
           ))}
         </nav>
         <div className="header-actions">
-          <TrackedLink href="/#booking" className="button header-cta" />
           <ThemeToggle className="desktop-theme-toggle" />
           <button
             className="menu-toggle"
@@ -88,9 +86,6 @@ export default function SiteHeader() {
             {link.label}
           </Link>
         ))}
-        <div onClick={() => setOpen(false)}>
-          <TrackedLink href="/#booking" />
-        </div>
         <ThemeToggle className="mobile-theme-toggle" />
       </nav>
     </header>

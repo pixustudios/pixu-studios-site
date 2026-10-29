@@ -3,35 +3,15 @@ import { experiences, site } from "@/lib/site";
 import { pageMetadata } from "@/lib/metadata";
 import TrackedLink from "../components/TrackedLink";
 import FinalCTA from "../components/FinalCTA";
+import TiltPhoto from "../components/TiltPhoto";
 export const metadata = pageMetadata(
-  "The Experiences",
-  "Vintage photobooth hire, instant prints and candid 35mm film photography. Discover what’s included in the PIXÜ event experience.",
+  "Vintage Photobooth Hire",
+  "Vintage photobooth hire with instant prints and personalised keepsakes. Discover what’s included in the PIXÜ photobooth experience.",
   "/experiences",
 );
 export default function Experiences() {
   return (
-    <main id="main">
-      <header className="container page-intro">
-        <p className="eyebrow">The PIXÜ experiences</p>
-        <h1>
-          A good night.
-          <br />
-          <em>A great keepsake.</em>
-        </h1>
-        <p>
-          Two ways to happily document your event.
-          <br />
-          Choose one, or make a night of both.
-        </p>
-        <div className="actions">
-          <a className="text-link" href="#photobooth">
-            Vintage Photobooth
-          </a>
-          <a className="text-link" href="#film">
-            35mm Film
-          </a>
-        </div>
-      </header>
+    <main id="main" className="experiences-page">
       {experiences.map((service) => (
         <section
           id={service.id}
@@ -55,24 +35,18 @@ export default function Experiences() {
               }).replace(/</g, "\\u003c"),
             }}
           />
-          <div className="detail-photo">
+          <TiltPhoto>
             <Image
-              src={service.image.src}
-              alt={service.image.alt}
+              src="/pixu-photobooth-refined.png"
+              alt="PIXÜ wooden photobooth on its wooden tripod"
               fill
               sizes="(max-width: 767px) 92vw, 50vw"
             />
-          </div>
+          </TiltPhoto>
           <div className="detail-copy">
-            <p className="eyebrow">
-              {service.number} /{" "}
-              {service.id === "film" ? "On film" : "Behind the curtain"}
-            </p>
             <h2>
               {service.name}
-              {service.id === "photobooth" && " Hire"}
             </h2>
-            <p className="serif-lead">{service.suffix}</p>
             <p>{service.detail}</p>
             <h3 className="eyebrow">The experience includes</h3>
             <ul className="inclusions">
@@ -81,10 +55,10 @@ export default function Experiences() {
               ))}
             </ul>
             <p className="small">{service.note}</p>
-            <TrackedLink href={`/contact?experience=${service.id}`} />
+            <TrackedLink className="sketch-booking-link" href="#booking" />
           </div>
           <div className="supporting-photos">
-            {service.supporting.map((photo) => (
+            {[{ src: "/pixu-heart-strip-new.png", alt: "An I love pixü strip with four black-and-white group portraits", width: 304, height: 912 }, { src: "/pixu-black-strip-new.png", alt: "A black pixü strip with four colour portraits of friends", width: 301, height: 918 }, { src: "/pixu-pattern-strip-new.png", alt: "A patterned pixü strip with three portraits of two friends", width: 298, height: 913 }, { src: "/pixu-red-strip.png", alt: "A red pixü photo strip with four group portraits", width: 306, height: 919 }].map((photo) => (
               <Image
                 key={photo.src}
                 src={photo.src}

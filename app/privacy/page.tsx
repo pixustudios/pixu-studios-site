@@ -8,7 +8,6 @@ export const metadata = pageMetadata(
 export default function Privacy() {
   return (
     <main id="main" className="container prose">
-      <p className="eyebrow">Your privacy</p>
       <h1>
         Small print.
         <br />
@@ -22,12 +21,13 @@ export default function Privacy() {
       <h2>Your enquiries</h2>
       <p>
         The enquiry form collects your name, email, event date, event type,
-        location and chosen experience. Your phone number and message are
-        optional. These details are sent to PIXÜ so the team can respond and
+        phone number, event time, hire duration, guest count, photobooth option,
+        referral source and preferred contact method. Location and your message are
+        optional. These details are submitted to PIXÜ’s Google Form so the team can respond and
         prepare a quote.
       </p>
       <p>
-        The configured delivery service is Resend. When enabled, Cloudflare
+        Enquiry responses are stored through Google Forms. When enabled, Cloudflare
         Turnstile checks form submissions for spam and may process technical
         device and connection information. Hosting providers also process
         technical request data to operate the site.
