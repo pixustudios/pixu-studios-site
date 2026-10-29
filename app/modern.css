@@ -2075,7 +2075,16 @@ html[data-theme="light"] .pixu-modern .booth-sketch-stage .template-options butt
 }
 
 .client-brands { text-align: center; }
-.client-brands h2 { font-size: clamp(30px, 4vw, 46px); }
+.home-page .client-brands .client-brands-heading {
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  color: var(--foreground-soft);
+  text-transform: uppercase;
+}
 .client-brand-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
