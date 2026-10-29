@@ -1819,7 +1819,7 @@ html[data-theme="light"] .pixu-modern .final-cta {
 
 /* Keep the booth flow proportionate to the available viewport. */
 .pixu-modern .booth-shell {
-  padding-block: 56px 20px;
+  padding-block: 24px 20px;
   min-height: calc(100dvh - 96px);
 }
 .pixu-modern .booth-heading {
