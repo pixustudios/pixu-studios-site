@@ -155,7 +155,7 @@ function EnquiryFormContent() {
     <label className="form-field">
       <span id={`${name}-label`}>
         {label}
-        {optional && " (optional)"}
+        {optional && name !== "location" && " (optional)"}
       </span>
       <input
         aria-labelledby={`${name}-label`}
