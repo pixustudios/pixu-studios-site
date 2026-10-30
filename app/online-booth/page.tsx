@@ -16,6 +16,7 @@ type Step = "landing" | "layout" | "permission" | "camera" | "preview";
 export default function OnlineBooth() {
   const [step, setStep] = useState<Step>("landing");
   const [entering, setEntering] = useState(false);
+  const [suggestion, setSuggestion] = useState("");
   useEffect(() => {
     if (!entering) return;
     const reveal = window.setTimeout(() => setStep("layout"), 300);
@@ -434,6 +435,28 @@ export default function OnlineBooth() {
         Made in your browser. Kept by you.{" "}
         <Link href="/privacy">Camera privacy</Link>
       </p>
+      {step === "landing" && (
+        <details className="booth-suggestions">
+          <summary>
+            <span>More little moments, coming soon.</span>
+            <span className="booth-suggestions-hint">Have an idea? Leave us a note <span aria-hidden="true">+</span></span>
+          </summary>
+          <form onSubmit={(event) => {
+            event.preventDefault();
+            const note = suggestion.trim();
+            if (!note) return;
+            window.location.href = `mailto:info@pixustudios.com?subject=${encodeURIComponent("Online Booth — a little idea")}&body=${encodeURIComponent(note)}`;
+          }}>
+            <p>More features are on the way. Tell us what you’d love to see inside the booth.</p>
+            <label htmlFor="booth-suggestion">Your little idea</label>
+            <textarea id="booth-suggestion" name="suggestion" rows={3} maxLength={1500} required value={suggestion} onChange={(event) => setSuggestion(event.target.value)} placeholder="A new finish, a fun feature, a little something missing…" />
+            <div className="booth-suggestions-send">
+              <button className="button button-outline" type="submit" disabled={!suggestion.trim()}>Email your idea</button>
+              <span>Opens your email app. Press send there to share your note.</span>
+            </div>
+          </form>
+        </details>
+      )}
     </main>
   );
 }

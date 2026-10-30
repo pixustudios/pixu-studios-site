@@ -2401,3 +2401,41 @@ html[data-theme="light"] .pixu-modern .experiences-page .final-cta {
 }
 .pixu-modern .booth-close:hover { border-color: var(--text); background: var(--surface); }
 .pixu-modern .booth-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.pixu-modern .booth-suggestions {
+  max-width: 760px;
+  margin: 24px auto 12px;
+  border-top: 1px solid currentColor;
+  padding-top: 18px;
+}
+.pixu-modern .booth-suggestions summary {
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+  list-style: none;
+}
+.pixu-modern .booth-suggestions summary::-webkit-details-marker { display: none; }
+.pixu-modern .booth-suggestions summary > span:first-child {
+  font: italic 28px/1.2 var(--font-display-family);
+}
+.pixu-modern .booth-suggestions-hint { font-size: 12px; }
+.pixu-modern .booth-suggestions-hint > span { display: inline-block; margin-left: 8px; }
+.pixu-modern .booth-suggestions[open] .booth-suggestions-hint > span { transform: rotate(45deg); }
+.pixu-modern .booth-suggestions form { padding-top: 18px; }
+.pixu-modern .booth-suggestions form p { font-size: 14px; margin-bottom: 16px; }
+.pixu-modern .booth-suggestions label { display: block; font-size: 13px; margin-bottom: 8px; }
+.pixu-modern .booth-suggestions textarea {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid currentColor;
+  border-radius: 3px 7px 4px 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  resize: vertical;
+}
+.pixu-modern .booth-suggestions-send { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
+.pixu-modern .booth-suggestions-send > span { font-size: 12px; }
