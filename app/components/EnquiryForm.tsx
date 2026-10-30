@@ -28,6 +28,7 @@ function EnquiryFormContent() {
   );
   const [state, setState] = useState<"idle" | "loading" | "success">("idle");
   const [message, setMessage] = useState("");
+  const [googleFormFallback, setGoogleFormFallback] = useState("");
   const started = useRef(false);
   const submitting = useRef(false);
   const requestId = useRef("");
@@ -78,6 +79,8 @@ function EnquiryFormContent() {
     const checked = validateEnquiry(fields);
     setErrors(checked.errors);
     setMessage("");
+    setGoogleFormFallback("");
+    setGoogleFormFallback("");
     if (!checked.valid) {
       const first = Object.keys(checked.errors)[0];
       (form.elements.namedItem(first) as HTMLElement)?.focus();
@@ -105,6 +108,9 @@ function EnquiryFormContent() {
       });
       const data = await response.json();
       if (!response.ok || !data.ok) {
+        if (response.status === 503 && typeof data.googleFormUrl === "string" && data.googleFormUrl.startsWith("https://docs.google.com/forms/")) {
+          setGoogleFormFallback(data.googleFormUrl);
+        }
         setErrors(data.errors || {});
         throw new Error(data.error || "Please try again or email us directly.");
       }
@@ -259,6 +265,7 @@ function EnquiryFormContent() {
           {message}
         </p>
       )}
+      {googleFormFallback && <p className="form-status"><a className="sketch-booking-link" href={googleFormFallback} rel="noreferrer">Continue in Google Forms</a></p>}
       <button className="button" type="submit" disabled={state === "loading"}>
         {state === "loading" ? "Sending your enquiry…" : "Send enquiry"}
       </button>

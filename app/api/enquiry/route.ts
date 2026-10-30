@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { validateEnquiry } from "@/lib/enquiry";
-import { googleFormAnswers, googleFormUrl } from "@/lib/google-form";
+import { googleFormAnswers, googleFormUrl, googleFormPrefillUrl } from "@/lib/google-form";
 const accepted = new Map<string, number>();
 export const runtime = "nodejs";
 const reply = (body: object, status: number) =>
@@ -69,7 +69,8 @@ export async function POST(request: Request) {
     return reply(
       {
         error:
-          "Online enquiries are temporarily unavailable. Please email info@pixustudios.com with your event date.",
+          "Please finish your enquiry in our Google Form using the button below. Your details will be carried over; review them and press Submit there.",
+        googleFormUrl: googleFormPrefillUrl(validated.data),
       },
       503,
     );

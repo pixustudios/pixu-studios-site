@@ -1,6 +1,15 @@
 import type { Enquiry } from "./enquiry";
 
 export const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSegu5GHrW3bZ1zhUnGvKod1n6-Izm8hxoDUWXaqkVsTFnv2NA/formResponse";
+export function googleFormPrefillUrl(data: Enquiry) {
+  const url = new URL(googleFormUrl.replace("/formResponse", "/viewform"));
+  url.search = googleFormAnswers(data).toString();
+  url.searchParams.set("entry.1800385611", data.date);
+  url.searchParams.set("usp", "pp_url");
+  url.searchParams.delete("fvv");
+  url.searchParams.delete("pageHistory");
+  return url.toString();
+}
 
 // Field IDs and choices verified from the public form on 29 October 2026.
 export function googleFormAnswers(data: Enquiry) {

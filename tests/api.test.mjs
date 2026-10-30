@@ -71,7 +71,16 @@ test("invalid form returns field errors", async () => {
 });
 test("production fails closed without spam credentials", async () => {
   process.env.NODE_ENV = "production";
-  assert.equal((await POST(req())).status, 503);
+  const response = await POST(req());
+  assert.equal(response.status, 503);
+  const body = await response.json();
+  assert.equal(body.ok, undefined);
+  const fallback = new URL(body.googleFormUrl);
+  assert.equal(fallback.hostname, "docs.google.com");
+  assert.ok(fallback.pathname.endsWith("/viewform"));
+  assert.equal(fallback.searchParams.get("entry.434032452"), valid.name);
+  assert.equal(fallback.searchParams.get("entry.1212460850"), valid.email);
+  assert.equal(fallback.searchParams.get("entry.1800385611"), valid.date);
 });
 test("Google Form validation response never claims success", async () => {
   delete process.env.RESEND_API_KEY;
