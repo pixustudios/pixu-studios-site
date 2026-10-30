@@ -5,6 +5,11 @@ import Image from "next/image";
 import {
   boothTemplates,
   boothLayouts,
+  photoShapes,
+  photoFilters,
+
+
+  type PhotoShape,
   type BoothLayoutId,
   cameraErrorMessage,
   createComposite,
@@ -12,6 +17,7 @@ import {
 } from "@/lib/booth";
 import { track } from "@/lib/analytics";
 import TrackedLink from "../components/TrackedLink";
+import BoothPhotoEditor from "../components/BoothPhotoEditor";
 type Step = "landing" | "layout" | "permission" | "camera" | "preview";
 export default function OnlineBooth() {
   const [step, setStep] = useState<Step>("landing");
@@ -31,16 +37,24 @@ export default function OnlineBooth() {
   const count = selectedLayout.count;
   const [photos, setPhotos] = useState<string[]>([]);
   const [template, setTemplate] = useState(0);
+  const [photoShape, setPhotoShape] = useState<PhotoShape>("Rectangle");
+  const [filterIndex, setFilterIndex] = useState(0);
+  const [baseImage, setBaseImage] = useState("");
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [frame, setFrame] = useState(1);
+
   const [flash, setFlash] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [exportFile, setExportFile] = useState<File | null>(null);
-  const [shareable, setShareable] = useState(false);
+  const shareable = !!exportFile && typeof navigator !== "undefined" && !!navigator.canShare?.({ files: [exportFile] });
   const video = useRef<HTMLVideoElement>(null);
-  const preview = useRef<HTMLCanvasElement>(null);
   const panel = useRef<HTMLElement>(null);
+  const layoutPicker = useRef<HTMLDivElement>(null);
+  const chooseLayout = (direction: number) => {
+    const next = (boothLayouts.findIndex(layout => layout.id === layoutId) + direction + boothLayouts.length) % boothLayouts.length;
+    setLayoutId(boothLayouts[next].id);
+    layoutPicker.current?.children[next]?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "nearest", inline: "center" });
+  };
   const stream = useRef<MediaStream | null>(null);
   const generation = useRef(0);
   const active = useRef(false);
@@ -78,17 +92,10 @@ export default function OnlineBooth() {
   useEffect(() => {
     if (step !== "preview" || !photos.length) return;
     let cancelled = false;
-    createComposite(photos, boothTemplates[template], layoutId)
-      .then(({ canvas, blob }) => {
-        if (cancelled || !preview.current) return;
-        preview.current.width = canvas.width;
-        preview.current.height = canvas.height;
-        preview.current.getContext("2d")?.drawImage(canvas, 0, 0);
-        const file = new File([blob], "pixu-happily-documented.png", {
-          type: "image/png",
-        });
-        setExportFile(file);
-        setShareable(!!navigator.canShare?.({ files: [file] }));
+    createComposite(photos, boothTemplates[template], layoutId, photoShape, photoFilters[filterIndex].value)
+      .then(({ canvas }) => {
+        if (cancelled) return;
+        setBaseImage(canvas.toDataURL("image/png"));
       })
       .catch((e) => {
         if (!cancelled) setError(cameraErrorMessage(e));
@@ -96,14 +103,15 @@ export default function OnlineBooth() {
     return () => {
       cancelled = true;
     };
-  }, [photos, template, step, layoutId]);
+  }, [photos, template, step, layoutId, photoShape, filterIndex]);
   const resetCamera = () => {
     stop();
     setPhotos([]);
     setExportFile(null);
+    setBaseImage("");
     setError("");
     setCountdown(null);
-    setFrame(1);
+
     setBusy(false);
     setFlash(false);
     setStep("permission");
@@ -162,7 +170,7 @@ export default function OnlineBooth() {
     const captured: string[] = [];
     try {
       for (let i = 0; i < count; i++) {
-        setFrame(i + 1);
+
         for (let n = 3; n > 0; n--) {
           setCountdown(n);
           await wait(1000);
@@ -223,9 +231,9 @@ export default function OnlineBooth() {
     <main id="main" className="container booth-shell">
       <header className="booth-heading">
         <h1>
-          <em>Online Booth</em>
+          <em>pixü &amp; friends</em>
         </h1>
-        <p>Get close. Be yourself. Keep the moment.</p>
+        <p>Your online photobooth.</p>
       </header>
       <section
         ref={panel}
@@ -237,7 +245,6 @@ export default function OnlineBooth() {
       >
         {step !== "landing" && <button type="button" className="booth-close" aria-label="Close booth and return to welcome" title="Back to welcome" onClick={() => { resetCamera(); setEntering(false); setStep("landing"); requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(".booth-entry-ticket")?.focus()); }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>}
         {entering && <div className="booth-curtain-transition" aria-hidden="true"><span /><span /></div>}
-        {step !== "landing" && <div className="booth-stage-masthead"><Image className="booth-ink-transparent" src="/online-booth-sketch-facing-right.svg" alt="" width={480} height={620} /><div><span>Inside the booth</span><p>{step === "layout" ? "01 — Pick your format" : step === "permission" ? "02 — Pull up a seat" : step === "camera" ? "03 — Make a memory" : "04 — Yours to keep"}</p></div></div>}
         {step === "landing" && (
           <>
             <Image className="booth-illustration booth-ink-transparent" src="/online-booth-sketch-facing-right.svg" alt="Simple line sketch of a vintage photobooth facing right with a handwritten PIXÜ sign" width={480} height={620} priority />
@@ -260,7 +267,6 @@ export default function OnlineBooth() {
                 track("online_booth_started");
               }}
             >
-              <span className="booth-ticket-stub" aria-hidden="true">01</span>
               <span className="booth-ticket-copy"><span className="booth-ticket-caption">Your moment awaits</span><span className="booth-ticket-title">Enter the booth</span></span>
               <svg className="booth-ticket-door" viewBox="0 0 32 40" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true"><path d="m5 36 1-31 22 1-1 30M3 37h27" /><path className="ticket-door-leaf" d="m7 6 15 4-1 25-15 1 1-30Z" /><path d="m17 21 1 .2" strokeWidth="2.5" /></svg>
             </button>
@@ -270,33 +276,39 @@ export default function OnlineBooth() {
         {step === "layout" && (
           <>
             <h2>Choose your layout.</h2>
-            <div className="booth-layouts">
+            <div className="booth-layout-carousel">
+            <button type="button" className="layout-arrow" aria-label="Previous layout" onClick={() => chooseLayout(-1)}>‹</button>
+            <div className="booth-layouts" ref={layoutPicker}>
               {boothLayouts.map((layout) => (
                 <button
                   key={layout.id}
                   className="layout-option"
+                  aria-label={layout.name}
                   aria-pressed={layoutId === layout.id}
-                  onClick={() => setLayoutId(layout.id)}
+                  onClick={event => { setLayoutId(layout.id); event.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" }); }}
                 >
-                  <span
-                    className={`layout-diagram format-${layout.id}`}
-                    aria-hidden="true"
-                  >
-                    {Array.from({ length: layout.count }, (_, i) => (
-                      <i key={i} />
-                    ))}
+                  <span className={`layout-diagram format-${layout.id}`} aria-hidden="true">
+                    {Array.from({ length: layout.count }, (_, i) => <i key={i} />)}
                   </span>
-                  {layout.name}
                 </button>
               ))}
             </div>
+            <button type="button" className="layout-arrow" aria-label="Next layout" onClick={() => chooseLayout(1)}>›</button>
+            </div>
+            <p className="layout-selection-caption" aria-live="polite">{selectedLayout.name} <span> / {String(boothLayouts.findIndex(layout => layout.id === layoutId) + 1).padStart(2, "0")} of {String(boothLayouts.length).padStart(2, "0")}</span></p>
             <button className="button" onClick={() => setStep("permission")}>
               Continue
             </button>
           </>
         )}
         {step === "permission" && (
-          <>
+          <div className="booth-permission-content">
+            <svg className="booth-permission-camera" width="96" height="78" viewBox="0 0 96 78" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M17 14q-5 0-5 5v25q0 5 5 5l62 1q5 0 5-5V20q0-5-5-5l-62-1Z" />
+              <circle cx="48" cy="32" r="12" /><circle cx="48" cy="32" r="8" />
+              <path d="M44 28q-3 1-3 5M20 26v12M24 26v12M72 30h3M40 50l-3 11 22 .3-3-11M37 61l-10 7q-2 2 1 3h40q3-1 1-3l-10-7M32 67l31 .3" />
+              <circle cx="73" cy="23" r="1.5" fill="currentColor" stroke="none" />
+            </svg>
             <h2>Let’s see you.</h2>
             <p>
               Allow camera access to take your photographs. No microphone, no
@@ -319,14 +331,11 @@ export default function OnlineBooth() {
                 Back to layouts
               </button>
             </div>
-          </>
+          </div>
         )}
         <div hidden={step !== "camera"}>
-          <p className="small" aria-live="polite">
-            Photo {frame} of {count}
-          </p>
           <h2>{busy ? "Make it a moment." : "Ready when you are."}</h2>
-          <div className="booth-camera" style={{ aspectRatio: selectedLayout.frameRatio }}>
+          <div className="booth-camera" style={{ aspectRatio: "16 / 9" }}>
             <video
               ref={video}
               autoPlay
@@ -361,13 +370,7 @@ export default function OnlineBooth() {
         </div>
         {step === "preview" && (
           <div className="booth-preview">
-            <canvas
-              ref={preview}
-              width={1200}
-              height={photos.length * 850 + 220}
-              role="img"
-              aria-label={`Your completed PIXÜ ${selectedLayout.name}`}
-            />
+            {baseImage ? <BoothPhotoEditor image={baseImage} onExport={setExportFile} /> : <p role="status">Preparing your photo…</p>}
             <div>
               <h2>
                 That’s <em>a keeper.</em>
@@ -375,10 +378,13 @@ export default function OnlineBooth() {
               <p>
                 Choose a finish for your {selectedLayout.name.toLowerCase()}.
               </p>
-              <div className="template-options">
+              <div className="template-options finish-swatches" role="group" aria-label="Frame colour">
                 {boothTemplates.map((item, i) => (
                   <button
                     key={item.name}
+                    aria-label={item.name}
+                    title={item.name}
+                    style={{ backgroundColor: item.background }}
                     aria-pressed={template === i}
                     onClick={() => {
                       if (i !== template) {
@@ -387,10 +393,19 @@ export default function OnlineBooth() {
                       }
                     }}
                   >
-                    {item.name}
+                    <span className="sr-only">{item.name}</span>
                   </button>
                 ))}
               </div>
+              <label className="booth-shape-picker">Photo shape
+                <select value={photoShape} onChange={event => { setExportFile(null); setPhotoShape(event.target.value as PhotoShape); }}>
+                  {photoShapes.map(shape => <option key={shape}>{shape}</option>)}
+                </select>
+              </label>
+              <fieldset className="booth-filter-picker">
+                <legend>Photo filter</legend>
+                <div>{photoFilters.map((filter, index) => <button type="button" key={filter.name} aria-pressed={filterIndex === index} onClick={() => { setExportFile(null); setFilterIndex(index); }}>{filter.name}</button>)}</div>
+              </fieldset>
               <div className="actions">
                 <button
                   className="button"
@@ -445,7 +460,7 @@ export default function OnlineBooth() {
             event.preventDefault();
             const note = suggestion.trim();
             if (!note) return;
-            window.location.href = `mailto:info@pixustudios.com?subject=${encodeURIComponent("Online Booth — a little idea")}&body=${encodeURIComponent(note)}`;
+            window.location.href = `mailto:info@pixustudios.com?subject=${encodeURIComponent("pixü & friends — a little idea")}&body=${encodeURIComponent(note)}`;
           }}>
             <p>More features are on the way. Tell us what you’d love to see inside the booth.</p>
             <label htmlFor="booth-suggestion">Your little idea</label>

@@ -9,6 +9,7 @@ import {
   type Enquiry,
 } from "@/lib/enquiry";
 import { track } from "@/lib/analytics";
+import EnquirySuccess from "./EnquirySuccess";
 import Link from "next/link";
 type Turnstile = {
   render: (el: HTMLElement, options: Record<string, unknown>) => string;
@@ -132,18 +133,7 @@ function EnquiryFormContent() {
   };
   if (state === "success")
     return (
-      <div ref={result} tabIndex={-1} className="success-panel" role="status">
-        <p className="eyebrow">Enquiry received</p>
-        <h2>You’re in.</h2>
-        <p>We’ll check the date and get back to you shortly.</p>
-        <p>
-          This is an enquiry, not a confirmed booking. We’ll talk through the
-          details together.
-        </p>
-        <Link href="/#gallery" className="text-link">
-          A little inspiration while you wait
-        </Link>
-      </div>
+      <EnquirySuccess ref={result} />
     );
   const field = (
     name: keyof Enquiry,

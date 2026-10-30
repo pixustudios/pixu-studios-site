@@ -58,7 +58,7 @@ export default function Experiences() {
             <TrackedLink className="sketch-booking-link" href="#booking" />
           </div>
           <div className="supporting-photos">
-            {[{ src: "/pixu-heart-strip-new.png", alt: "An I love pixü strip with four black-and-white group portraits", width: 304, height: 912 }, { src: "/pixu-black-strip-new.png", alt: "A black pixü strip with four colour portraits of friends", width: 301, height: 918 }, { src: "/pixu-pattern-strip-new.png", alt: "A patterned pixü strip with three portraits of two friends", width: 298, height: 913 }, { src: "/pixu-red-strip.png", alt: "A red pixü photo strip with four group portraits", width: 306, height: 919 }].map((photo) => (
+            {[{ src: "/pixu-heart-strip-new.png", alt: "An I love pixü strip with four black-and-white group portraits", width: 304, height: 912 }, { src: "/pixu-pattern-strip-new.png", alt: "A patterned pixü strip with three portraits of two friends", width: 298, height: 913 }, { src: "/pixu-red-strip.png", alt: "A red pixü photo strip with four group portraits", width: 306, height: 919 }, { src: "/pixu-friends-black-strip.png", alt: "A black pixü photo strip with four portraits of three friends", width: 311, height: 936 }].map((photo) => (
               <Image
                 key={photo.src}
                 src={photo.src}

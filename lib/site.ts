@@ -90,6 +90,7 @@ export const experiences = [
       "Unlimited booth sessions & instant prints",
       "Personalised print design",
       "Digital gallery",
+      "Props",
       "Professional attendant, setup & pack down",
     ],
     detail:

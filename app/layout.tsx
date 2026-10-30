@@ -11,6 +11,12 @@ const manrope = localFont({
   weight: "200 800",
   display: "swap",
 });
+const handwriting = localFont({
+  variable: "--font-handwriting",
+  src: "./fonts/Allura-Regular.ttf",
+  weight: "400",
+  display: "swap",
+});
 const cormorant = localFont({
   variable: "--font-cormorant",
   src: [
@@ -29,7 +35,7 @@ const cormorant = localFont({
 });
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
-  title: { default: "pixü - vintage photobooth hire", template: "%s | PIXÜ Studios" },
+  title: { default: "pixü | vintage photobooth hire", template: "%s | PIXÜ Studios" },
   robots:
     process.env.NEXT_PUBLIC_SITE_URL && process.env.VERCEL_ENV !== "preview"
       ? { index: true, follow: true }
@@ -44,7 +50,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${manrope.variable} ${cormorant.variable}`}
+      className={`${manrope.variable} ${cormorant.variable} ${handwriting.variable}`}
     >
       <body>
         <a href="#main" className="skip-link">

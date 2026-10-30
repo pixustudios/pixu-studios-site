@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 
-export type GalleryImage = { src: string; label: string };
+export type GalleryImage = { src: string; label: string; event?: string };
 
 export default function GalleryLightbox({ images, layout = "masonry", footer }: { images: GalleryImage[]; layout?: "masonry" | "filmstrip"; footer?: ReactNode }) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
