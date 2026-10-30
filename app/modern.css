@@ -2114,6 +2114,11 @@ html[data-theme="light"] .client-logo-surface img { filter: brightness(0); }
 .shared-booking {
   scroll-margin-top: 100px;
 }
+html:not([data-theme="light"]) .experiences-page .shared-booking {
+  --background: #0e0c0d;
+  background: #0e0c0d;
+  border-top: 1px solid #ffffff14;
+}
 .pixu-modern .shared-booking h2,
 .pixu-modern .shared-booking h3 {
   font-family: var(--font-display), Georgia, serif;
