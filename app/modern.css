@@ -2087,7 +2087,7 @@ html[data-theme="light"] .pixu-modern .booth-sketch-stage .template-options butt
 }
 .client-brand-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: start;
   gap: 32px;
   margin-top: 36px;
