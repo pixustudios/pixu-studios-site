@@ -42,6 +42,7 @@ export default function OnlineBooth() {
   const [filterIndex, setFilterIndex] = useState(0);
   const [baseImage, setBaseImage] = useState("");
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [captureIndex, setCaptureIndex] = useState<number | null>(null);
 
   const [flash, setFlash] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -75,6 +76,7 @@ export default function OnlineBooth() {
         stop();
         setBusy(false);
         setCountdown(null);
+        setCaptureIndex(null);
         setFlash(false);
         setStep("permission");
         setError(
@@ -112,6 +114,7 @@ export default function OnlineBooth() {
     setBaseImage("");
     setError("");
     setCountdown(null);
+    setCaptureIndex(null);
 
     setBusy(false);
     setFlash(false);
@@ -178,6 +181,7 @@ export default function OnlineBooth() {
     const operation = generation.current;
     setBusy(true);
     setError("");
+    setCaptureIndex(null);
     const wait = async (ms: number) => {
       await new Promise((resolve) => setTimeout(resolve, ms));
       if (operation !== generation.current) throw new Error("cancelled");
@@ -185,7 +189,7 @@ export default function OnlineBooth() {
     const captured: string[] = [];
     try {
       for (let i = 0; i < count; i++) {
-
+        setCaptureIndex(i + 1);
         for (let n = 3; n > 0; n--) {
           setCountdown(n);
           await wait(1000);
@@ -214,11 +218,13 @@ export default function OnlineBooth() {
       setExportFile(null);
       setStep("preview");
       setBusy(false);
+      setCaptureIndex(null);
       track("online_booth_completed");
     } catch (e) {
       if (operation === generation.current) {
         setError(cameraErrorMessage(e));
         setCountdown(null);
+        setCaptureIndex(null);
         setFlash(false);
         setBusy(false);
       }
@@ -269,7 +275,7 @@ export default function OnlineBooth() {
          } else {
            setClosing(true);
          }
-       }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>}
+       }}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>}
        {(entering || closing) && <div className={`booth-curtain-transition${closing ? " is-closing" : ""}`} aria-hidden="true"><span /><span /></div>}
         {step === "landing" && (
           <>
@@ -369,6 +375,11 @@ export default function OnlineBooth() {
               muted
               aria-label="Live camera preview"
             />
+            {count > 1 && captureIndex !== null && (
+              <span className="booth-photo-progress" aria-live="polite">
+                {captureIndex}/{count}
+              </span>
+            )}
             {countdown !== null && (
               <span className="countdown" role="status" aria-live="assertive">
                 {countdown}
