@@ -115,6 +115,7 @@ export default function OnlineBooth() {
 
     setBusy(false);
     setFlash(false);
+    setStep("permission");
   }, [stop]);
   useEffect(() => {
     if (!closing) return;
@@ -167,6 +168,10 @@ export default function OnlineBooth() {
         setStep("permission");
       }
     }
+  };
+  const retake = () => {
+    resetCamera();
+    void startCamera();
   };
   const capture = async () => {
     if (busy || !active.current || !video.current) return;
@@ -444,7 +449,7 @@ export default function OnlineBooth() {
                     Share
                   </button>
                 )}
-                <button className="text-link" onClick={resetCamera}>
+                <button className="text-link" onClick={retake}>
                   Retake {count > 1 ? "photos" : "photo"}
                 </button>
               </div>
