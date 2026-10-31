@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { createBoothLogoMark } from "@/lib/booth";
 
 type Point = { x: number; y: number };
 type Mark = { kind: "draw"; points: Point[]; color: string; width: number } | { kind: "sticker"; point: Point; text: string; color: string; size: number };
@@ -48,16 +49,8 @@ export default function BoothPhotoEditor({ image, onExport }: { image: string; o
     photo.src = image;
     photo.decode().then(async () => {
       if (!logo.current) {
-        const asset = new window.Image(); asset.src = "/logo.png"; await asset.decode();
-        const cutout = document.createElement("canvas"); cutout.width = 805; cutout.height = 475;
-        const ink = cutout.getContext("2d")!;
-        ink.drawImage(asset, 95, 265, 805, 475, 0, 0, 805, 475);
-        const pixels = ink.getImageData(0, 0, 805, 475);
-        for (let i = 0; i < pixels.data.length; i += 4) {
-          const darkest = Math.min(pixels.data[i], pixels.data[i + 1], pixels.data[i + 2]);
-          pixels.data[i + 3] = Math.round(pixels.data[i + 3] * (1 - darkest / 255));
-        }
-        ink.putImageData(pixels, 0, 0); logo.current = cutout;
+        const asset = new window.Image(); asset.src = "/pixu-studios-logo.png"; await asset.decode();
+        logo.current = createBoothLogoMark(asset);
       }
       if (cancelled || !canvas.current) return;
       const el = canvas.current; el.width = photo.width; el.height = photo.height;
@@ -125,7 +118,7 @@ export default function BoothPhotoEditor({ image, onExport }: { image: string; o
       }} onPointerUp={finish} onPointerCancel={finish} onLostPointerCapture={finish} />
     <details className="booth-decoration-tools"><summary className="booth-design-trigger"><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="m4 16-1 5 5-1L20 8l-4-4L4 16Z M13 7l4 4M4 16l4 4M19 2v3M17.5 3.5h3" /></svg><span><strong>Make it yours</strong><small>Design your photo · stickers & doodles</small></span><span className="design-trigger-plus" aria-hidden="true">+</span></summary>
       <p>Pick a sticker and tap your photo to place it. Draw to doodle, or choose Move and drag any sticker or doodle to reposition it.</p>
-      <div className="editor-tool-row" aria-label="Decoration tools">{["Move", "Draw", "PIXÜ", "♡", "♥", "✦", "★", "✿", "☺", "xoxo"].map(item => <button type="button" key={item} aria-pressed={tool === item} aria-label={item === "Move" ? "Move stickers and doodles" : item === "Draw" ? "Draw on photo" : `Place ${item} sticker`} onClick={() => setTool(item)}>{item === "PIXÜ" ? <Image src="/logo.png" alt="PIXÜ logo" width={48} height={28} className="editor-logo-sticker" /> : item}</button>)}</div>
+      <div className="editor-tool-row" aria-label="Decoration tools">{["Move", "Draw", "PIXÜ", "♡", "♥", "✦", "★", "✿", "☺", "xoxo"].map(item => <button type="button" key={item} aria-pressed={tool === item} aria-label={item === "Move" ? "Move stickers and doodles" : item === "Draw" ? "Draw on photo" : `Place ${item} sticker`} onClick={() => setTool(item)}>{item === "PIXÜ" ? <Image src="/pixu-studios-logo.png" alt="PIXÜ logo" width={48} height={28} className="editor-logo-sticker" /> : item}</button>)}</div>
       <div className="editor-tool-row">
         <label>Ink <input aria-label="Drawing and sticker colour" type="color" value={color} onChange={e => setColor(e.target.value)} /></label>
         <label>Sticker size <input type="range" min="0.035" max="0.18" step="0.005" value={size} onChange={e => setSize(Number(e.target.value))} /></label>

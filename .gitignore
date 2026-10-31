@@ -47,3 +47,6 @@ next-env.d.ts
 /test-results/
 /.npm-cache/
 /pixu-redesign-saved.zip
+
+.vercel
+.env*

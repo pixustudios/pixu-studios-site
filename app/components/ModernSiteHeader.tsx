@@ -10,6 +10,23 @@ const links = [
   { href: "/#about", label: "About" },
   { href: "/online-booth", label: "Online Booth" },
 ];
+function ShopNavItem({ tooltipId, label = "Shop" }: { tooltipId: string; label?: string }) {
+  return (
+    <span className="shop-nav-wrap">
+      <button
+        type="button"
+        className="shop-nav-item"
+        aria-disabled="true"
+        aria-describedby={tooltipId}
+      >
+        {label}
+      </button>
+      <span className="shop-nav-tooltip" id={tooltipId} role="tooltip">
+        Coming soon
+      </span>
+    </span>
+  );
+}
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -39,7 +56,7 @@ export default function SiteHeader() {
           onClick={() => setOpen(false)}
         >
           <Image
-            src="/logo.png"
+            src="/pixu-studios-logo.png"
             alt="PIXÜ"
             width={200}
             height={90}
@@ -56,6 +73,7 @@ export default function SiteHeader() {
               {link.label}
             </Link>
           ))}
+          <ShopNavItem tooltipId="shop-coming-soon-desktop" />
         </nav>
         <div className="header-actions">
           <ThemeToggle className="desktop-theme-toggle" />
@@ -64,9 +82,10 @@ export default function SiteHeader() {
             ref={toggle}
             aria-expanded={open}
             aria-controls="mobile-menu"
+            aria-label={open ? "close menu" : "open menu"}
             onClick={() => setOpen(!open)}
           >
-            {open ? "Close −" : "Menu +"}
+            {open ? "close" : "menu"}
           </button>
         </div>
       </div>
@@ -83,9 +102,10 @@ export default function SiteHeader() {
             onClick={() => setOpen(false)}
             aria-current={pathname === link.href ? "page" : undefined}
           >
-            {link.label}
+            {link.label.toLowerCase()}
           </Link>
         ))}
+        <ShopNavItem tooltipId="shop-coming-soon-mobile" label="shop" />
         <ThemeToggle className="mobile-theme-toggle" />
       </nav>
     </header>

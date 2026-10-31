@@ -2,7 +2,7 @@
 
 # PIXÜ Studios
 
-An editorial event photography website built with Next.js 16.3.6, React 19, TypeScript and Tailwind CSS 4. It uses the App Router, server-rendered pages, an enquiry route handler, responsive image optimisation, and local licensed Manrope / Cormorant Garamond webfonts.
+An editorial event photography website built with Next.js 16.4.3, React 19, TypeScript and Tailwind CSS 4. It uses the App Router, server-rendered pages, an enquiry route handler, responsive image optimisation, and local licensed Manrope / Cormorant Garamond webfonts.
 
 ## Local development
 

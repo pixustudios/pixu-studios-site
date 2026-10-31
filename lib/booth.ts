@@ -73,6 +73,72 @@ export const photoFilters = [
   { name: "Soft", value: "contrast(.85) saturate(.8) brightness(1.1)" },
   { name: "Bold", value: "contrast(1.2) saturate(1.25)" },
 ] as const;
+export function createBoothLogoMark(asset: CanvasImageSource) {
+  const logo = document.createElement("canvas");
+  logo.width = 805;
+  logo.height = 475;
+  const context = logo.getContext("2d");
+  if (!context)
+    throw new Error("Your browser couldn’t prepare the PIXÜ logo. Please try again.");
+  context.drawImage(asset, 95, 265, 805, 475, 0, 0, 805, 475);
+  const pixels = context.getImageData(0, 0, logo.width, logo.height);
+  for (let i = 0; i < pixels.data.length; i += 4) {
+    const darkest = Math.min(pixels.data[i], pixels.data[i + 1], pixels.data[i + 2]);
+    pixels.data[i + 3] = Math.round(pixels.data[i + 3] * (1 - darkest / 255));
+  }
+  context.putImageData(pixels, 0, 0);
+  return logo;
+}
+export function applyPhotoFilterPixels(pixels: Uint8ClampedArray, filter: string) {
+  const operations = [...filter.matchAll(/([a-z-]+)\(([^)]+)\)/g)];
+  if (operations.map(([operation]) => operation).join(" ") !== filter.trim())
+    throw new Error("This photo filter isn’t supported by your browser.");
+  const clamp = (value: number) => Math.max(0, Math.min(255, value));
+  for (let offset = 0; offset < pixels.length; offset += 4) {
+    let [red, green, blue] = pixels.slice(offset, offset + 3);
+    for (const [, name, rawValue] of operations) {
+      const value = Number(rawValue.replace(/%|deg$/, ""));
+      if (!Number.isFinite(value))
+        throw new Error("This photo filter isn’t supported by your browser.");
+      const amount = rawValue.endsWith("%") ? value / 100 : value;
+      if (name === "grayscale" || name === "sepia") {
+        const weight = Math.max(0, Math.min(1, amount));
+        const transformed = name === "grayscale"
+          ? [red * .2126 + green * .7152 + blue * .0722, red * .2126 + green * .7152 + blue * .0722, red * .2126 + green * .7152 + blue * .0722]
+          : [red * .393 + green * .769 + blue * .189, red * .349 + green * .686 + blue * .168, red * .272 + green * .534 + blue * .131];
+        red = clamp(red + (transformed[0] - red) * weight);
+        green = clamp(green + (transformed[1] - green) * weight);
+        blue = clamp(blue + (transformed[2] - blue) * weight);
+      } else if (name === "saturate") {
+        const gray = red * .213 + green * .715 + blue * .072;
+        red = clamp(gray * (1 - amount) + red * amount);
+        green = clamp(gray * (1 - amount) + green * amount);
+        blue = clamp(gray * (1 - amount) + blue * amount);
+      } else if (name === "hue-rotate") {
+        const radians = value * Math.PI / 180;
+        const cosine = Math.cos(radians), sine = Math.sin(radians);
+        [red, green, blue] = [
+          clamp(red * (.213 + .787 * cosine - .213 * sine) + green * (.715 - .715 * cosine - .715 * sine) + blue * (.072 - .072 * cosine + .928 * sine)),
+          clamp(red * (.213 - .213 * cosine + .143 * sine) + green * (.715 + .285 * cosine + .140 * sine) + blue * (.072 - .072 * cosine - .283 * sine)),
+          clamp(red * (.213 - .213 * cosine - .787 * sine) + green * (.715 - .715 * cosine + .715 * sine) + blue * (.072 + .928 * cosine + .072 * sine)),
+        ];
+      } else if (name === "contrast") {
+        red = clamp((red - 128) * amount + 128);
+        green = clamp((green - 128) * amount + 128);
+        blue = clamp((blue - 128) * amount + 128);
+      } else if (name === "brightness") {
+        red = clamp(red * amount);
+        green = clamp(green * amount);
+        blue = clamp(blue * amount);
+      } else {
+        throw new Error("This photo filter isn’t supported by your browser.");
+      }
+    }
+    pixels[offset] = red;
+    pixels[offset + 1] = green;
+    pixels[offset + 2] = blue;
+  }
+}
 export function photoShapePath(shape: PhotoShape, x: number, y: number, w: number, h: number) {
   const path = new Path2D();
   const cx = x + w / 2, cy = y + h / 2;
@@ -122,14 +188,27 @@ export async function createComposite(
     throw new Error(
       "Your browser couldn’t create the image. Try a different browser.",
     );
-  await document.fonts.ready;
-  const family = getComputedStyle(document.documentElement).getPropertyValue("--font-display") || "Georgia";
+  const supportsCanvasFilter = typeof context.filter === "string";
   context.fillStyle = template.background;
   context.fillRect(0, 0, canvas.width, canvas.height);
   for (let i = 0; i < photos.length; i++) {
     const photo = new Image();
     photo.src = photos[i];
     await photo.decode();
+    let photoSource: CanvasImageSource = photo;
+    if (filter !== "none" && !supportsCanvasFilter) {
+      const filteredCanvas = document.createElement("canvas");
+      filteredCanvas.width = photo.width;
+      filteredCanvas.height = photo.height;
+      const filteredContext = filteredCanvas.getContext("2d");
+      if (!filteredContext)
+        throw new Error("Your browser couldn’t apply the photo filter. Please try again.");
+      filteredContext.drawImage(photo, 0, 0);
+      const pixels = filteredContext.getImageData(0, 0, photo.width, photo.height);
+      applyPhotoFilterPixels(pixels.data, filter);
+      filteredContext.putImageData(pixels, 0, 0);
+      photoSource = filteredCanvas;
+    }
     const ratio = Math.max(frameWidth / photo.width, frameHeight / photo.height);
     const sourceWidth = Math.min(photo.width, frameWidth / ratio);
     const sourceHeight = Math.min(photo.height, frameHeight / ratio);
@@ -137,9 +216,9 @@ export async function createComposite(
       context.save();
       context.clip(photoShapePath(shape, padding + (i % layout.columns) * (frameWidth + gap), padding + Math.floor(i / layout.columns) * (frameHeight + gap), frameWidth, frameHeight));
     }
-    context.filter = filter;
+    if (supportsCanvasFilter) context.filter = filter;
     context.drawImage(
-      photo,
+      photoSource,
       (photo.width - sourceWidth) / 2,
       (photo.height - sourceHeight) / 2,
       sourceWidth,
@@ -149,13 +228,32 @@ export async function createComposite(
       frameWidth,
       frameHeight,
     );
-    context.filter = "none";
+    if (supportsCanvasFilter) context.filter = "none";
     if (shape !== "Rectangle") context.restore();
   }
-  context.fillStyle = template.text;
-  context.textAlign = "center";
-  context.font = `italic 600 85px ${family || "Georgia"}`;
-  context.fillText("pixü", canvas.width / 2, canvas.height - 100);
+  const asset = new Image();
+  asset.src = "/pixu-studios-logo.png";
+  await asset.decode();
+  const logo = createBoothLogoMark(asset);
+  const tintedLogo = document.createElement("canvas");
+  tintedLogo.width = logo.width;
+  tintedLogo.height = logo.height;
+  const logoContext = tintedLogo.getContext("2d");
+  if (!logoContext)
+    throw new Error("Your browser couldn’t prepare the PIXÜ logo. Please try again.");
+  logoContext.drawImage(logo, 0, 0);
+  logoContext.globalCompositeOperation = "source-in";
+  logoContext.fillStyle = template.text;
+  logoContext.fillRect(0, 0, tintedLogo.width, tintedLogo.height);
+  const logoWidth = Math.min(150, canvas.width * .16);
+  const logoHeight = logoWidth * tintedLogo.height / tintedLogo.width;
+  context.drawImage(
+    tintedLogo,
+    (canvas.width - logoWidth) / 2,
+    canvas.height - 100 - logoHeight / 2,
+    logoWidth,
+    logoHeight,
+  );
   const blob = await new Promise<Blob>((resolve, reject) =>
     canvas.toBlob(
       (value) =>

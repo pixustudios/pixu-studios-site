@@ -22,6 +22,7 @@ type Step = "landing" | "layout" | "permission" | "camera" | "preview";
 export default function OnlineBooth() {
   const [step, setStep] = useState<Step>("landing");
   const [entering, setEntering] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [suggestion, setSuggestion] = useState("");
   useEffect(() => {
     if (!entering) return;
@@ -104,7 +105,7 @@ export default function OnlineBooth() {
       cancelled = true;
     };
   }, [photos, template, step, layoutId, photoShape, filterIndex]);
-  const resetCamera = () => {
+  const resetCamera = useCallback(() => {
     stop();
     setPhotos([]);
     setExportFile(null);
@@ -114,8 +115,17 @@ export default function OnlineBooth() {
 
     setBusy(false);
     setFlash(false);
-    setStep("permission");
-  };
+  }, [stop]);
+  useEffect(() => {
+    if (!closing) return;
+    const finish = window.setTimeout(() => {
+      resetCamera();
+      setStep("landing");
+      setClosing(false);
+      requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(".booth-entry-ticket")?.focus());
+    }, 720);
+    return () => window.clearTimeout(finish);
+  }, [closing, resetCamera]);
   const startCamera = async () => {
     if (active.current) return;
     stop();
@@ -241,10 +251,21 @@ export default function OnlineBooth() {
         className={`booth-panel${step === "landing" ? " booth-brand" : " booth-sketch-stage"}${entering ? " is-entering" : ""}`}
         aria-label="Online photobooth"
         data-step={step}
-        aria-busy={entering}
+        aria-busy={entering || closing}
       >
-        {step !== "landing" && <button type="button" className="booth-close" aria-label="Close booth and return to welcome" title="Back to welcome" onClick={() => { resetCamera(); setEntering(false); setStep("landing"); requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(".booth-entry-ticket")?.focus()); }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>}
-        {entering && <div className="booth-curtain-transition" aria-hidden="true"><span /><span /></div>}
+       {step !== "landing" && <button type="button" className="booth-close" aria-label="close booth and return to welcome" title="back to welcome" disabled={closing} onClick={() => {
+         if (closing) return;
+         stop();
+         setEntering(false);
+         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+           resetCamera();
+           setStep("landing");
+           requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(".booth-entry-ticket")?.focus());
+         } else {
+           setClosing(true);
+         }
+       }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>}
+       {(entering || closing) && <div className={`booth-curtain-transition${closing ? " is-closing" : ""}`} aria-hidden="true"><span /><span /></div>}
         {step === "landing" && (
           <>
             <Image className="booth-illustration booth-ink-transparent" src="/online-booth-sketch-facing-right.svg" alt="Simple line sketch of a vintage photobooth facing right with a handwritten PIXÜ sign" width={480} height={620} priority />
@@ -255,8 +276,7 @@ export default function OnlineBooth() {
               <em>Or steal a moment.</em>
             </h2>
             <p>
-              A photo strip, a four-frame grid or a single moment. Choose a PIXÜ finish, then
-              download your own little memory.
+              Choose a layout, take your photos and make them yours with playful finishes.
             </p>
             <button
               className="booth-entry-ticket"
@@ -270,6 +290,7 @@ export default function OnlineBooth() {
               <span className="booth-ticket-copy"><span className="booth-ticket-caption">Your moment awaits</span><span className="booth-ticket-title">Enter the booth</span></span>
               <svg className="booth-ticket-door" viewBox="0 0 32 40" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true"><path d="m5 36 1-31 22 1-1 30M3 37h27" /><path className="ticket-door-leaf" d="m7 6 15 4-1 25-15 1 1-30Z" /><path d="m17 21 1 .2" strokeWidth="2.5" /></svg>
             </button>
+            <p className="booth-device-note">Best on desktop. Works on mobile too.</p>
             </div>
           </>
         )}

@@ -37,7 +37,7 @@ export default function SiteHeader() {
           </nav>
 
           <Link href="/" className="justify-self-center" aria-label="PIXÜ home">
-            <Image src="/logo.png" alt="PIXÜ Studios logo" width={200} height={90} priority className="mx-auto h-auto w-[120px] sm:w-[160px]" style={{ filter: theme === "dark" ? "brightness(0) invert(1)" : "none" }} />
+            <Image src="/pixu-studios-logo.png" alt="PIXÜ Studios logo" width={200} height={90} priority className="mx-auto h-auto w-[120px] sm:w-[160px]" style={{ filter: theme === "dark" ? "brightness(0) invert(1)" : "none" }} />
           </Link>
 
           <div className="hidden items-center justify-self-end gap-3 lg:flex">

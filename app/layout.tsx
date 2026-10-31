@@ -5,6 +5,13 @@ import SiteShell from "./components/SiteShell";
 import { site } from "@/lib/site";
 import "./globals.css";
 import "./modern.css";
+const shareTitle = "pixü | vintage photobooth hire";
+const shareDescription =
+  "Vintage photobooth experience in London and surrounding areas for brand activations, parties, events, weddings & more. High quality photographs and instant keepsakes, made for the people in the room.";
+const shareImage = new URL(
+  "/pixu-social-preview.png",
+  site.url,
+).toString();
 const manrope = localFont({
   variable: "--font-manrope",
   src: "./fonts/Manrope.woff2",
@@ -35,7 +42,31 @@ const cormorant = localFont({
 });
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
-  title: { default: "pixü | vintage photobooth hire", template: "%s | PIXÜ Studios" },
+  title: { default: shareTitle, template: "%s | PIXÜ Studios" },
+  description: shareDescription,
+  alternates: { canonical: site.url },
+  openGraph: {
+    title: shareTitle,
+    description: shareDescription,
+    url: site.url,
+    siteName: site.name,
+    locale: "en_GB",
+    type: "website",
+    images: [
+      {
+        url: shareImage,
+        width: 1200,
+        height: 630,
+        alt: "Where moments are happily documented. Vintage photobooth hire for events worth remembering.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: shareTitle,
+    description: shareDescription,
+    images: [shareImage],
+  },
   robots:
     process.env.NEXT_PUBLIC_SITE_URL && process.env.VERCEL_ENV !== "preview"
       ? { index: true, follow: true }

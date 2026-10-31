@@ -29,3 +29,10 @@ See README.md for exact configuration and deployment steps. The local preview is
 
 ## Original-design restoration
 The original design/routes were restored after the checks above. Those earlier responsive/redirect results describe the saved redesign. The secure form and new Online Booth remain. Build, lint and 17 tests passed after restoration; the smoke script now covers the restored routes.
+
+## Dependency security update — 30 October 2026
+
+- Updated Next.js and `eslint-config-next` from 16.3.6 to 16.4.3; refreshed vulnerable transitive dependencies (`sharp` 0.35.5, `source-map-js` 1.2.2, and development-only `zod` 4.6.7).
+- Full and production-only `npm audit` checks: zero vulnerabilities.
+- After the update: 23 tests passed, ESLint passed, type generation and TypeScript checks passed, and the production build passed on Next.js 16.4.3.
+- These checks validate the local checkout only. No production deployment was made.

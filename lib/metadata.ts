@@ -19,7 +19,7 @@ export function pageMetadata(
       type: "website",
       images: [
         {
-          url: new URL("/insta1.jpg", site.url).toString(),
+          url: new URL("/pixu-photobooth-kiss-black-and-white.jpg", site.url).toString(),
           width: 1107,
           height: 806,
           alt: "A happily documented PIXÜ moment",
@@ -30,7 +30,7 @@ export function pageMetadata(
       card: "summary_large_image",
       title,
       description,
-      images: [new URL("/insta1.jpg", site.url).toString()],
+      images: [new URL("/pixu-photobooth-kiss-black-and-white.jpg", site.url).toString()],
     },
   };
 }

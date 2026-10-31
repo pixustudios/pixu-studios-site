@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { boothLayouts, boothTemplates, createComposite, photoShapes, photoShapePath } from "../lib/booth.ts";
+import { applyPhotoFilterPixels, boothLayouts, boothTemplates, createComposite, photoFilters, photoShapes, photoShapePath } from "../lib/booth.ts";
 
 test("photo masks are closed, finite paths for each supported shape", () => {
   const paths = [];
@@ -25,9 +25,28 @@ test("photo masks are closed, finite paths for each supported shape", () => {
 
 test("all booth layouts export the right photo count, bounds and grid positions", async () => {
   let draws = [];
+  const logoDraws = [];
+  const textDraws = [];
   const photoFilterValues = [];
-  const logoFilterValues = [];
-  const context = { translate() {}, rotate() {}, save() {}, restore() {}, clip() {}, fillRect() {}, fillText() { logoFilterValues.push(this.filter); }, drawImage(...args) { draws.push(args); photoFilterValues.push(this.filter); } };
+  const context = {
+    filter: "none",
+    translate() {},
+    rotate() {},
+    save() {},
+    restore() {},
+    clip() {},
+    fillRect() {},
+    getImageData: (_x, _y, width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }),
+    putImageData() {},
+    fillText(...args) { textDraws.push(args); },
+    drawImage(...args) {
+      if (args[0]?.src === "photo") {
+        draws.push(args);
+        photoFilterValues.push(this.filter);
+      }
+      if (args.length === 5) logoDraws.push(args);
+    },
+  };
   globalThis.document = {
     createElement: () => ({ width: 0, height: 0, getContext: () => context, toBlob: (callback) => callback(new Blob(["png"])) }),
     fonts: { ready: Promise.resolve() },
@@ -52,6 +71,9 @@ test("all booth layouts export the right photo count, bounds and grid positions"
       assert.ok(draws[1][5] > draws[0][5]);
       assert.ok(draws[2][6] > draws[0][6]);
     }
+    const logoDraw = logoDraws.at(-1);
+    assert.equal(logoDraw[3], 150, `${layout.id} keeps the logo small`);
+    assert.ok(logoDraw[4] < 100, `${layout.id} preserves the logo aspect ratio`);
     for (const shape of photoShapes) {
       const shaped = await createComposite(Array(layout.count).fill("photo"), boothTemplates[1], layout.id, shape);
       assert.equal(shaped.canvas.width, canvas.width, `${layout.id} ${shape} width`);
@@ -62,5 +84,41 @@ test("all booth layouts export the right photo count, bounds and grid positions"
   await assert.rejects(createComposite(["photo"], boothTemplates[0], "grid"), /retake/);
   await createComposite(["photo"], boothTemplates[0], "single", "Rectangle", "grayscale(1)");
   assert.equal(photoFilterValues.at(-1), "grayscale(1)", "filter applies to photo pixels");
-  assert.equal(logoFilterValues.at(-1), "none", "logo keeps its original finish colour");
+  assert.equal(textDraws.length, 0, "the keepsake brand is an image instead of text");
+});
+
+test("photo filters transform pixels for browsers without canvas filter support", () => {
+  for (const filter of photoFilters.slice(1)) {
+    const pixels = new Uint8ClampedArray([80, 145, 210, 255]);
+    applyPhotoFilterPixels(pixels, filter.value);
+    assert.notDeepEqual([...pixels], [80, 145, 210, 255], filter.name);
+    assert.equal(pixels[3], 255, `${filter.name} preserves alpha`);
+  }
+});
+
+test("composites use the pixel fallback when canvas filters are unavailable", async () => {
+  let photoSource;
+  let filteredPixels;
+  const context = {
+    drawImage(source) { photoSource = source; },
+    getImageData() { return { data: new Uint8ClampedArray([80, 145, 210, 255]) }; },
+    putImageData({ data }) { filteredPixels = [...data]; },
+    translate() {},
+    rotate() {},
+    save() {},
+    restore() {},
+    clip() {},
+    fillRect() {},
+    fillText() {},
+  };
+  globalThis.document = {
+    createElement: () => ({ width: 0, height: 0, getContext: () => context, toBlob: callback => callback(new Blob(["png"])) }),
+    fonts: { ready: Promise.resolve() },
+    documentElement: {},
+  };
+  globalThis.getComputedStyle = () => ({ getPropertyValue: () => "Georgia" });
+  globalThis.Image = class { width = 1920; height = 1440; async decode() {} };
+  await createComposite(["photo"], boothTemplates[0], "single", "Rectangle", photoFilters[1].value);
+  assert.notDeepEqual(filteredPixels, [80, 145, 210, 255], "fallback processes photo pixels");
+  assert.notEqual(photoSource, "photo", "composite draws the filtered canvas");
 });
